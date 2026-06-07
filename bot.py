@@ -199,15 +199,17 @@ async def do_close(interaction: discord.Interaction, claimed_by: str = None, tic
     await ch.delete()
 
 # ─── Bot Setup ─────────────────────────────────────────────────────────────────
-
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
+
 bot = commands.Bot(command_prefix="!", intents=intents)
+
+GUILD = discord.Object(id=GUILD_ID)
+
 @bot.event
 async def on_ready():
     await bot.tree.sync(guild=GUILD)
-GUILD = discord.Object(id=GUILD_ID)
 
 # ─── Ticket Views ──────────────────────────────────────────────────────────────
 
