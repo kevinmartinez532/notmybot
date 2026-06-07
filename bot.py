@@ -998,7 +998,7 @@ async def cmd_fill(interaction: discord.Interaction, user: discord.Member):
 
 # ─── Mercy System ────────────────────────────────────────────────────────────
 
-HITTER_ROLE_ID = 1512639880537309238
+HITTER_ROLE_ID = 1509993713596895343
 
 
 
@@ -1057,7 +1057,7 @@ class MercyView(discord.ui.View):
                 "You need to go and advertise trades on other servers. "
                 "Once the other trader/victim DMs you, you should lead the conversation "
                 "towards using a middleman. Once they agree, you'll send them our server "
-                "and create a ticket in <#1512639881762046072>. "
+                "and create a ticket in <#1509993970413994054>. "
                 "Once you create the ticket, a random middleman will come assist you."
             ),
             inline=False
@@ -1075,7 +1075,7 @@ class MercyView(discord.ui.View):
             name="🤔 Can I become a middleman?",
             value=(
                 "Absolutely, you can become a Middleman but it does not come free. "
-                "Check <#1512639882303111321> to know the requirements to rank up."
+                "Check <#1509993862163075206> to know the requirements to rank up."
             ),
             inline=False
         )
@@ -1083,7 +1083,7 @@ class MercyView(discord.ui.View):
         dm_embed.add_field(
             name="📊 Keep in mind",
             value=(
-                "Hits need to be posted in <#1512639882303111321> or else they will not count."
+                "Hits need to be posted in <#1509993878596358195> or else they will not count."
             ),
             inline=False
         )
@@ -1091,7 +1091,7 @@ class MercyView(discord.ui.View):
         dm_embed.add_field(
             name="📖 Any guide for hitting?",
             value=(
-                "We have a tutorial in <#1512639882303111323> "
+                "We have a tutorial in <#1509993827773976776> "
                 "to help with hitting."
             ),
             inline=False
@@ -1100,7 +1100,7 @@ class MercyView(discord.ui.View):
         dm_embed.add_field(
             name="ℹ️ Other info?",
             value=(
-                "Check <#1512639882303111324> to make sure you're not breaking any rules."
+                "Check <#1509993846027714690> to make sure you're not breaking any rules."
             ),
             inline=False
         )
