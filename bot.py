@@ -7,7 +7,7 @@ import os
 import datetime
 
 TOKEN = os.environ["BOT_TOKEN"]
-GUILD_ID = 1512639880537309234
+GUILD_ID = 1509986055112233042
 
 # ─── Role IDs ──────────────────────────────────────────────────────────────────
 ROLE = {
