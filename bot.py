@@ -1359,13 +1359,14 @@ async def dm_role(interaction: discord.Interaction, target: discord.Role, messag
     log_ch = interaction.guild.get_channel(CH["role_log"])
     if log_ch:
         log_embed = discord.Embed(title="📬 /dm Executed", color=0x5865f2, timestamp=discord.utils.utcnow())
-        log_embed.add_field(name="Target Role",   value=target.mention,          inline=True)
-        log_embed.add_field(name="Sent By",       value=interaction.user.mention, inline=True)
-        log_embed.add_field(name="✅ Sent",        value=str(success),             inline=True)
-        log_embed.add_field(name="❌ Failed",      value=str(failed),              inline=True)
-        log_embed.add_field(name="Message",       value=message[:1024],           inline=False)
+        log_embed.add_field(name="Target Role", value=target.mention, inline=True)
+        log_embed.add_field(name="Sent By", value=interaction.user.mention, inline=True)
+        log_embed.add_field(name="✅ Sent", value=str(success), inline=True)
+        log_embed.add_field(name="❌ Failed", value=str(failed), inline=True)
+        log_embed.add_field(name="Message", value=message[:1024], inline=False)
         log_embed.set_footer(text=FOOTER)
         await log_ch.send(embed=log_embed)
 
-
+if __name__ == "__main__":
+    bot.run(TOKEN)
 
