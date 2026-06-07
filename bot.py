@@ -204,6 +204,9 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
+@bot.event
+async def on_ready():
+    await bot.tree.sync(guild=GUILD)
 GUILD = discord.Object(id=GUILD_ID)
 
 # ─── Ticket Views ──────────────────────────────────────────────────────────────
