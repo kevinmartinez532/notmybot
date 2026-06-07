@@ -89,7 +89,7 @@ MM_CLAIM     = [ROLE["middleman"], ROLE["head_mid"], ROLE["manager"],
                 ROLE["chief_exec"], ROLE["director"], ROLE["president"]]
 INDEX_CLAIM  = [ROLE["index_mm"]]
 ADMIN_ROLES  = [ROLE["manager"], ROLE["co_founder"], ROLE["chief_exec"], ROLE["director"], ROLE["president"]]
-SETUP_ROLE   = 1512639880570732646  # only role that can use setup + tos/rules/faq commands
+SETUP_ROLE   = 1509993683380998365  # only role that can use setup + tos/rules/faq commands
 MERCY_USE_ROLE = [ROLE["middleman"], ROLE["head_mid"], ROLE["lead_mid"]]  # all middleman roles can use /mercy
 MM_PING      = [ROLE["middleman"]]
 
