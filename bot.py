@@ -7,24 +7,24 @@ import os
 import datetime
 
 TOKEN = os.environ["BOT_TOKEN"]
-GUILD_ID = 1509986055112233042
+GUILD_ID = 1472343485687267408
 
 # ─── Role IDs ──────────────────────────────────────────────────────────────────
 ROLE = {
-    "middleman":     1509993712074096780,
-    "head_mid":      1509993710446706708,
-    "lead_mid":      1509993709385683117,
-    "moderator":     1509993705984233603,
-    "senior_mod":    1509993704818086050,
-    "coordinator":   1509993704012648690,
-    "administrator": 1509993703320850574,
-    "manager":       1509993701743792159,
-    "co_founder":    1509993700682502266,
-    "chief_exec":    1509993699772338356,
-    "director":      1509993698866233595,
-    "president":     1509993697205420152,
-    "index_mm":      1513235401207189556,
-    "ban_perms":     1512530606884520108,
+    "middleman":     1472343485695918100,
+    "head_mid":      1472343485695918101,
+    "lead_mid":      1472343485695918102,
+    "moderator":     1472343485695918109,
+    "senior_mod":    1472343485704310794,
+    "coordinator":   1472343485704310796,
+    "administrator": 1472343485704310798,
+    "manager":       1519461160758415494,
+    "co_founder":    1519416570605076560,
+    "chief_exec":    1472343485704310801,
+    "director":      1472343485704310802,
+    "president":     1472343485704310803,
+    "index_mm":      1519444171763482675,
+    "ban_perms":     1472343485704310795,
 }
 
 # Ordered lowest → highest for /managerole hierarchy
@@ -62,22 +62,22 @@ PROMOTE_CEILING = {
 
 # ─── Channel IDs ───────────────────────────────────────────────────────────────
 CH = {
-    "mm_setup":       1509993970413994054,
-    "mm_ticket_cat":  1509993737915338802,
-    "support_setup":  1509994000940273785,
-    "support_cat":    1509993774221361162,
-    "index_setup":    1513213338761302126,
-    "index_cat":      1513213434513195250,
-    "transcript_ch":  1509993884355268680,
-    "ban_log":        1509986056349548597,
-    "role_log":       1509986056349548597,
-    "app_setup":      1512639881631760429,
-    "app_cat":        1512639881762046068,
+    "mm_setup":       1519421791167320166,
+    "mm_ticket_cat":  1519448170336354366,
+    "support_setup":  1519461568599822397,
+    "support_cat":    1519448267564384399,
+    "index_setup":    1519422636642275421,
+    "index_cat":      1519448328163823780,
+    "transcript_ch":  1472343487792939088,
+    "ban_log":        1472343487792939089,
+    "role_log":       1472343487973425173,
+    "app_setup":      1519462194121805875,
+    "app_cat":        1519462274245333134,
     "d7_setup":       1512639881887748293,
     "d7_cat":         1512639882130882686,
 }
 
-FOOTER = "Powered by Gamivo Marketplace Middleman Service"
+FOOTER = "Powered by GAG 2 Trading & Middleman Service"
 
 
 # Staff groups
@@ -89,7 +89,7 @@ MM_CLAIM     = [ROLE["middleman"], ROLE["head_mid"], ROLE["manager"],
                 ROLE["chief_exec"], ROLE["director"], ROLE["president"]]
 INDEX_CLAIM  = [ROLE["index_mm"]]
 ADMIN_ROLES  = [ROLE["manager"], ROLE["co_founder"], ROLE["chief_exec"], ROLE["director"], ROLE["president"]]
-SETUP_ROLE   = 1509993683380998365  # only role that can use setup + tos/rules/faq commands
+SETUP_ROLE   = 1472343485721083915  # only role that can use setup + tos/rules/faq commands
 MERCY_USE_ROLE = [ROLE["middleman"], ROLE["head_mid"], ROLE["lead_mid"]]  # all middleman roles can use /mercy
 MM_PING      = [ROLE["middleman"]]
 
@@ -325,7 +325,7 @@ class MMRequestView(discord.ui.View):
         await interaction.response.send_modal(modal)
 
 
-class MMModal(discord.ui.Modal, title="Middleman Ticket | Gamivo Marketplace"):
+class MMModal(discord.ui.Modal, title="Middleman Ticket | GAG 2 Trading & Middleman Server"):
     trading_with = discord.ui.TextInput(
         label="Who are you trading with?",
         style=discord.TextStyle.short,
@@ -389,7 +389,7 @@ class SupportRequestView(discord.ui.View):
         await interaction.response.send_modal(modal)
 
 
-class SupportModal(discord.ui.Modal, title="Support Ticket | Gamivo Marketplace"):
+class SupportModal(discord.ui.Modal, title="Support Ticket | GAG 2 Trading & Middleman"):
     what  = discord.ui.TextInput(label="What would you like help with?",
                                   style=discord.TextStyle.paragraph, required=True)
     urgency = discord.ui.TextInput(label="How urgent is this? (1-10)",
@@ -570,7 +570,7 @@ async def setup_mm(interaction: discord.Interaction):
     if not any(r.id == SETUP_ROLE for r in interaction.user.roles):
         await interaction.response.send_message("No permission.", ephemeral=True)
         return
-    embed = discord.Embed(color=0x2b2d31, title="🛡️ Gamivo Marketplace | Welcome to Our MM Service")
+    embed = discord.Embed(color=0x2b2d31, title="🛡️ GAG 2 Trading & Middleman Server| Welcome to Our MM Service")
     embed.add_field(
         name="• Request Middleman",
         value="Read our mm-tos first, then tap **Request Middleman** and fill out the form.",
@@ -597,7 +597,7 @@ async def setup_support(interaction: discord.Interaction):
     if not any(r.id == SETUP_ROLE for r in interaction.user.roles):
         await interaction.response.send_message("No permission.", ephemeral=True)
         return
-    embed = discord.Embed(color=0x2b2d31, title="🛡️ Gamivo Marketplace | Support")
+    embed = discord.Embed(color=0x2b2d31, title="🛡️ GAG 2 Trading & Middleman Server | Support")
     embed.description = (
         "Need help? Our support team is available **24/7** to assist you with any issues you may have.\n\n"
         "Simply click the **Support** button below to open a private ticket with our staff."
@@ -639,7 +639,7 @@ async def setup_index(interaction: discord.Interaction):
     if not any(r.id == SETUP_ROLE for r in interaction.user.roles):
         await interaction.response.send_message("No permission.", ephemeral=True)
         return
-    embed = discord.Embed(color=0x2b2d31, title="📋 Gamivo Marketplace | Indexing Service")
+    embed = discord.Embed(color=0x2b2d31, title="📋 GAG 2 Trading & Middleman Server | Indexing Service")
     embed.description = (
         "Request an indexing service by selecting one of the available bases.\n"
         "One of our professional indexers will assist you in completing it!"
@@ -800,13 +800,13 @@ async def cmd_manageban(interaction: discord.Interaction, action: str,
 
 # ─── Info Commands ─────────────────────────────────────────────────────────────
 
-@bot.tree.command(name="rules", description="Display Gamivo Marketplace Rules", guild=GUILD)
+@bot.tree.command(name="rules", description="Display GAG 2 Trading & Middleman Server Rules", guild=GUILD)
 async def cmd_rules(interaction: discord.Interaction):
     if not any(r.id == SETUP_ROLE for r in interaction.user.roles):
         await interaction.response.send_message("No permission.", ephemeral=True)
         return
     embed = discord.Embed(
-        title="📋 Gamivo Marketplace Marketplace | Rules & Guidelines",
+        title="📋 GAG 2 Trading & Middleman Server | Rules & Guidelines",
         color=0x2b2d31
     )
     embed.add_field(name="1. 📜 Follow Discord ToS and Guidelines",
@@ -854,11 +854,11 @@ async def cmd_faq(interaction: discord.Interaction):
         await interaction.response.send_message("No permission.", ephemeral=True)
         return
     embed = discord.Embed(
-        title="🛡️ Gamivo Marketplace Marketplace | FAQ",
+        title="🛡️ GAG 2 Trading & Middleman Server | FAQ",
         color=0x2b2d31
     )
-    embed.add_field(name="What is Gamivo Marketplace ARMY?",
-        value="Gamivo Marketplace is a platform that provides a secure player-to-player marketplace for buyers and sellers of online gaming products. We provide a system for secure transactions — you do the rest. We have marketplaces for **250+ games** and leading titles!",
+    embed.add_field(name="What is GAG 2 Trading & Middleman Server?",
+        value="GAG2 Trading & Middleman Server is a platform that provides a secure player-to-player marketplace for buyers and sellers of online gaming products. We provide a system for secure transactions — you do the rest. We have marketplaces for **250+ games** and leading titles!",
         inline=False)
     embed.add_field(name="How does the Middleman service work?",
         value="Our verified Middlemen act as trusted third parties to hold and transfer items/funds during a trade. This ensures both parties are protected throughout the entire deal.",
@@ -880,7 +880,7 @@ async def cmd_faq(interaction: discord.Interaction):
     await interaction.response.send_message("✅ Done.", ephemeral=True)
 
 
-@bot.tree.command(name="tos", description="Gamivo Marketplace Trading Terms of Service", guild=GUILD)
+@bot.tree.command(name="tos", description="GAG 2 Trading & Middleman Server Trading Terms of Service", guild=GUILD)
 async def cmd_tos(interaction: discord.Interaction):
     if not any(r.id == SETUP_ROLE for r in interaction.user.roles):
         await interaction.response.send_message("No permission.", ephemeral=True)
@@ -998,7 +998,7 @@ async def cmd_fill(interaction: discord.Interaction, user: discord.Member):
 
 # ─── Mercy System ────────────────────────────────────────────────────────────
 
-HITTER_ROLE_ID = 1509993713596895343
+HITTER_ROLE_ID = 1472343485687267416
 
 
 
@@ -1057,7 +1057,7 @@ class MercyView(discord.ui.View):
                 "You need to go and advertise trades on other servers. "
                 "Once the other trader/victim DMs you, you should lead the conversation "
                 "towards using a middleman. Once they agree, you'll send them our server "
-                "and create a ticket in <#1509993970413994054>. "
+                "and create a ticket in <#1519421791167320166>. "
                 "Once you create the ticket, a random middleman will come assist you."
             ),
             inline=False
@@ -1075,7 +1075,7 @@ class MercyView(discord.ui.View):
             name="🤔 Can I become a middleman?",
             value=(
                 "Absolutely, you can become a Middleman but it does not come free. "
-                "Check <#1509993862163075206> to know the requirements to rank up."
+                "Check <#1472343487310725154> to know the requirements to rank up."
             ),
             inline=False
         )
@@ -1083,7 +1083,7 @@ class MercyView(discord.ui.View):
         dm_embed.add_field(
             name="📊 Keep in mind",
             value=(
-                "Hits need to be posted in <#1509993878596358195> or else they will not count."
+                "Hits need to be posted in <#1519412904418607376> or else they will not count."
             ),
             inline=False
         )
@@ -1091,7 +1091,7 @@ class MercyView(discord.ui.View):
         dm_embed.add_field(
             name="📖 Any guide for hitting?",
             value=(
-                "We have a tutorial in <#1509993827773976776> "
+                "We have a tutorial in <#1472343486824189954> "
                 "to help with hitting."
             ),
             inline=False
@@ -1100,7 +1100,7 @@ class MercyView(discord.ui.View):
         dm_embed.add_field(
             name="ℹ️ Other info?",
             value=(
-                "Check <#1509993846027714690> to make sure you're not breaking any rules."
+                "Check <#1472343486824189956> to make sure you're not breaking any rules."
             ),
             inline=False
         )
@@ -1113,7 +1113,7 @@ class MercyView(discord.ui.View):
             pass
 
         # Ghost ping in designated channel after accepting
-        ghost_ch = interaction.guild.get_channel(1512639882303111323)
+        ghost_ch = interaction.guild.get_channel(1472343486824189954)
         if ghost_ch:
             ghost_msg = await ghost_ch.send(interaction.user.mention)
             await ghost_msg.delete()
@@ -1232,7 +1232,7 @@ async def mercy(interaction: discord.Interaction, user: discord.Member):
 
 # ─── /role_all ─────────────────────────────────────────────────────────────────
 
-OWNER_ID = 1506430627501703249
+OWNER_ID = 1472343485721083915
 
 @bot.tree.command(
     name="role_all",
