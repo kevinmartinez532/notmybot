@@ -325,7 +325,7 @@ class MMRequestView(discord.ui.View):
         await interaction.response.send_modal(modal)
 
 
-class MMModal(discord.ui.Modal, title="Middleman Ticket | GAG 2 Trading & Middleman Server"):
+class MMModal(discord.ui.Modal, title="Middleman Ticket"):
     trading_with = discord.ui.TextInput(
         label="Who are you trading with?",
         style=discord.TextStyle.short,
