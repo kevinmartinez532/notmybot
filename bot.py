@@ -1167,7 +1167,10 @@ async def mercy(interaction: discord.Interaction, user: discord.Member):
         )
         return
 
+   try:
     await interaction.response.defer(ephemeral=True)
+except discord.NotFound:
+    return
 
     now_str = discord.utils.utcnow().strftime("%I:%M %p")
 
