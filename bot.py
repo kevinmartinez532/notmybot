@@ -649,18 +649,18 @@ async def setup_index(interaction: discord.Interaction):
 
     embed.description = (
         "Request a mutation service by selecting one of the available options.\n"
-        "One of our professional mutation specialists will assist you shortly!"
+        "One of our professional mutation specialists will assist you shortly! What does this mean? We grab THE BEST plants in the game, and farm THE best mutations on it. Im talking dragon breaths that sell for BILLIONS, Just make a ticket to learn more."
     )
 
     embed.add_field(
         name="Available Mutations & Prices",
         value=(
-            "🦄 Common Mutations — 1-2 Unicorns\n"
-            "🦄 Rare Mutations — 2 Unicorns\n"
-            "🐉 Epic Mutations — 1-2 Dragonflies\n"
-            "🐉 Legendary Mutations — 2 Dragonflies\n"
-            "🦝 Mythic Mutations — Raccoons (best tier)\n"
-            "🐍 Ice Serpents — Highest tier / premium mutations"
+            "🦄 Common Mutations(3-5 traits) — 1-2 Unicorns\n"
+            "🦄 Rare Mutations(8-10 traits) — 2 Unicorns\n"
+            "🐉 Epic Mutations(13-15 traits) — 1-2 Dragonflies\n"
+            "🐉 Legendary Mutations(20 traits) — 2 Dragonflies\n"
+            "🦝 Mythic Mutations(25 traits) — Raccoons (best tier)\n"
+            "🐍 Highest Tier Mutations - Ice Serpents (30-40 traits)/premium mutations"
         ),
         inline=False
     )
