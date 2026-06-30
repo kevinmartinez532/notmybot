@@ -425,63 +425,65 @@ class SupportModal(discord.ui.Modal, title="Support Ticket | GAG 2 Trading & Mid
         await interaction.response.send_message(f"Support ticket created: {ch.mention}", ephemeral=True)
 
 
-class IndexBaseSelect(discord.ui.Select):
+class MutationForgeSelect(discord.ui.Select):
     def __init__(self):
         options = [
-            discord.SelectOption(label="Diamond Base",    description="5+ Garamas or $20",  emoji="💎"),
-            discord.SelectOption(label="Rainbow Base",    description="5+ Garamas or $20",  emoji="🌈"),
-            discord.SelectOption(label="Candy Base",      description="3+ Garamas or $8",   emoji="🍬"),
-            discord.SelectOption(label="Lava Base",       description="4+ Garamas or $10",  emoji="🌋"),
-            discord.SelectOption(label="Galaxy Base",     description="4+ Garamas or $10",  emoji="🌌"),
-            discord.SelectOption(label="Gold Base",       description="4+ Garamas or $10",  emoji="⭐"),
-            discord.SelectOption(label="Yin Yang Base",   description="5+ Garamas or $15",  emoji="☯️"),
-            discord.SelectOption(label="Radioactive Base",description="5+ Garamas or $17",  emoji="☢️"),
-            discord.SelectOption(label="Cursed Base",     description="5+ Garamas or $17",  emoji="💀"),
-            discord.SelectOption(label="Divine Base",     description="8+ Garamas or $25",  emoji="✨"),
-            discord.SelectOption(label="Halloween Base",  description="$4 or 1-2 Garamas",  emoji="🎃"),
-            discord.SelectOption(label="Christmas Base",  description="$4 or 1-2 Garamas",  emoji="🎄"),
-            discord.SelectOption(label="Aquatic Base",    description="$4 or 1-2 Garamas",  emoji="🌊"),
-            discord.SelectOption(label="Easter Base",     description="$4 or 1-2 Garamas",  emoji="🐣"),
+            discord.SelectOption(label="Basic Forge",    description="Common mutations | Cheap & fast",  emoji="🟢"),
+            discord.SelectOption(label="Advanced Forge", description="Mid-tier mutations | Best value",   emoji="🔵"),
+            discord.SelectOption(label="Elite Forge",    description="High-value mutations | Premium",    emoji="🟣"),
+            discord.SelectOption(label="Event Forge",     description="Limited-time boosts | Highest RNG", emoji="🟡"),
+            discord.SelectOption(label="Collector Forge", description="Aesthetic / flex crops",           emoji="✨"),
+            discord.SelectOption(label="Bulk Forge",      description="10x+ mutation packages",            emoji="📦"),
         ]
-        super().__init__(placeholder="Select a base to request an index...",
-                         options=options, custom_id="v:index_select")
+        super().__init__(
+            placeholder="Select a Mutation Forge service...",
+            options=options,
+            custom_id="v:mutation_forge_select"
+        )
 
     async def callback(self, interaction: discord.Interaction):
-        base  = self.values[0]
+        forge = self.values[0]
         guild = interaction.guild
-        cat   = guild.get_channel(CH["index_cat"])
+        cat = guild.get_channel(CH["mutation_cat"])  # CHANGE THIS ID IN YOUR CONFIG
+
         if cat is None:
-            await interaction.response.send_message("Index category not found.", ephemeral=True)
+            await interaction.response.send_message("Mutation category not found.", ephemeral=True)
             return
+
         for c in cat.channels:
             if c.topic == str(interaction.user.id):
                 await interaction.response.send_message(
-                    f"You already have an open index ticket: {c.mention}", ephemeral=True)
+                    f"You already have an open mutation request: {c.mention}",
+                    ephemeral=True
+                )
                 return
+
         ch = await guild.create_text_channel(
-            name=f"index-{interaction.user.name}",
+            name=f"mutation-{interaction.user.name}",
             category=cat,
-            overwrites=index_overwrites(guild, interaction.user),
+            overwrites=index_overwrites(guild, interaction.user),  # you can rename function later if you want
             topic=str(interaction.user.id),
         )
-        embed = discord.Embed(color=0x2b2d31, title="📋 Index Ticket")
+
+        embed = discord.Embed(color=0x2b2d31, title="🧬 Mutation Forge Request")
         embed.description = (
-            f"{interaction.user.mention}, thank you for requesting an index!\n\n"
-            f"**Selected Base:** {base}\n\n"
-            "One of our professional indexers will assist you shortly."
+            f"{interaction.user.mention}, your Mutation Forge request has been created!\n\n"
+            f"**Selected Service:** {forge}\n\n"
+            "A mutation specialist will assist you shortly."
         )
         embed.set_footer(text=FOOTER)
+
         pings = " ".join(f"<@&{rid}>" for rid in INDEX_CLAIM) + f" {interaction.user.mention}"
-        view  = IndexTicketView(creator=interaction.user.mention)
+        view = IndexTicketView(creator=interaction.user.mention)  # you can rename later if wanted
+
         await ch.send(content=pings, embed=embed, view=view)
-        await interaction.response.send_message(f"Index ticket created: {ch.mention}", ephemeral=True)
+        await interaction.response.send_message(f"Mutation request created: {ch.mention}", ephemeral=True)
 
 
-class IndexRequestView(discord.ui.View):
+class MutationForgeView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
-        self.add_item(IndexBaseSelect())
-
+        self.add_item(MutationForgeSelect())
 
 # ─── Trade Confirmation View ───────────────────────────────────────────────────
 
