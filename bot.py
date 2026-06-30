@@ -641,23 +641,40 @@ async def setup_index(interaction: discord.Interaction):
     if not any(r.id == SETUP_ROLE for r in interaction.user.roles):
         await interaction.response.send_message("No permission.", ephemeral=True)
         return
-    embed = discord.Embed(color=0x2b2d31, title="📋 GAG 2 Trading & Middleman Server | Indexing Service")
+
+    embed = discord.Embed(
+        color=0x2b2d31,
+        title="🧬 GAG 2 Trading & Middleman Server | Mutation Service"
+    )
+
     embed.description = (
-        "Request an indexing service by selecting one of the available bases.\n"
-        "One of our professional indexers will assist you in completing it!"
-   embed.add_field(name="Available Mutations & Prices", value=(
-    "🦄 Common Mutations — 1-2 Unicorns\n"
-    "🦄 Rare Mutations — 2 Unicorns\n"
-    "🐉 Epic Mutations — 1-2 Dragonflies\n"
-    "🐉 Legendary Mutations — 2 Dragonflies\n"
-    "🦝 Mythic Mutations — Raccoons (best tier)\n"
-    "🐍 Ice Serpents — Highest tier / premium mutations\n"
-), inline=False)
-    embed.add_field(name="Note", value="Collateral may be required, the price is negotiable.", inline=False)
+        "Request a mutation service by selecting one of the available options.\n"
+        "One of our professional mutation specialists will assist you shortly!"
+    )
+
+    embed.add_field(
+        name="Available Mutations & Prices",
+        value=(
+            "🦄 Common Mutations — 1-2 Unicorns\n"
+            "🦄 Rare Mutations — 2 Unicorns\n"
+            "🐉 Epic Mutations — 1-2 Dragonflies\n"
+            "🐉 Legendary Mutations — 2 Dragonflies\n"
+            "🦝 Mythic Mutations — Raccoons (best tier)\n"
+            "🐍 Ice Serpents — Highest tier / premium mutations"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="Note",
+        value="Collateral may be required, the price is negotiable.",
+        inline=False
+    )
+
     embed.set_footer(text=FOOTER)
+
     await interaction.channel.send(embed=embed, view=MutationForgeView())
     await interaction.response.send_message("✅ Mutation panel deployed.", ephemeral=True)
-
 
 @bot.tree.command(name="add", description="Add a user to this ticket", guild=GUILD)
 @app_commands.describe(user="User to add")
