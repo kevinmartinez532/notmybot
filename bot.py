@@ -664,7 +664,7 @@ async def setup_index(interaction: discord.Interaction):
     ), inline=False)
     embed.add_field(name="Note", value="Collateral may be required, the price is negotiable.", inline=False)
     embed.set_footer(text=FOOTER)
-    await interaction.channel.send(embed=embed, view=IndexRequestView())
+    await interaction.channel.send(embed=embed, view=MutationForgeView())
     await interaction.response.send_message("✅ Index panel deployed.", ephemeral=True)
 
 
