@@ -645,27 +645,18 @@ async def setup_index(interaction: discord.Interaction):
     embed.description = (
         "Request an indexing service by selecting one of the available bases.\n"
         "One of our professional indexers will assist you in completing it!"
-    )
-    embed.add_field(name="Available Bases & Prices", value=(
-        "💎 Diamond Base — 5+ Garamas or $20\n"
-        "🌈 Rainbow Base — 5+ Garamas or $20\n"
-        "🍬 Candy Base — 3+ Garamas or $8\n"
-        "🌋 Lava Base — 4+ Garamas or $10\n"
-        "🌌 Galaxy Base — 4+ Garamas or $10\n"
-        "⭐ Gold Base — 4+ Garamas or $10\n"
-        "☯️ Yin Yang Base — 5+ Garamas or $15\n"
-        "☢️ Radioactive Base — 5+ Garamas or $17\n"
-        "💀 Cursed Base — 5+ Garamas or $17\n"
-        "✨ Divine Base — 8+ Garamas or $25\n"
-        "🎃 Halloween Base — $4 or 1-2 Garamas\n"
-        "🎄 Christmas Base — $4 or 1-2 Garamas\n"
-        "🌊 Aquatic Base — $4 or 1-2 Garamas\n"
-        "🐣 Easter Base — $4 or 1-2 Garamas"
-    ), inline=False)
+   embed.add_field(name="Available Mutations & Prices", value=(
+    "🦄 Common Mutations — 1-2 Unicorns\n"
+    "🦄 Rare Mutations — 2 Unicorns\n"
+    "🐉 Epic Mutations — 1-2 Dragonflies\n"
+    "🐉 Legendary Mutations — 2 Dragonflies\n"
+    "🦝 Mythic Mutations — Raccoons (best tier)\n"
+    "🐍 Ice Serpents — Highest tier / premium mutations\n"
+), inline=False)
     embed.add_field(name="Note", value="Collateral may be required, the price is negotiable.", inline=False)
     embed.set_footer(text=FOOTER)
     await interaction.channel.send(embed=embed, view=MutationForgeView())
-    await interaction.response.send_message("✅ Index panel deployed.", ephemeral=True)
+    await interaction.response.send_message("✅ Mutation panel deployed.", ephemeral=True)
 
 
 @bot.tree.command(name="add", description="Add a user to this ticket", guild=GUILD)
