@@ -444,7 +444,7 @@ class MutationForgeSelect(discord.ui.Select):
     async def callback(self, interaction: discord.Interaction):
         forge = self.values[0]
         guild = interaction.guild
-        cat = guild.get_channel(CH["mutation_cat"])  # CHANGE THIS ID IN YOUR CONFIG
+        cat = guild.get_channel(CH["index_cat"])
 
         if cat is None:
             await interaction.response.send_message("Mutation category not found.", ephemeral=True)
