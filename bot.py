@@ -1395,4 +1395,4 @@ async def cmd_mercy(interaction: discord.Interaction, user: discord.Member):
 
 if __name__ == "__main__":
     bot.run(TOKEN)
-```
+
