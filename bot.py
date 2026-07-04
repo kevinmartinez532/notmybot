@@ -471,24 +471,18 @@ class MutationForgeView(discord.ui.View):
 class ValuesView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
-        self.add_item(discord.ui.Button(
-            label="SAB Values",
-            style=discord.ButtonStyle.link,
-            url="https://sabrvalues.com/",
-            emoji="🌟"
-        ))
-        self.add_item(discord.ui.Button(
-            label="GAG Values",
-            style=discord.ButtonStyle.link,
-            url="https://www.growagardencalculator.com/grow-a-garden-2/",
-            emoji="🌱"
-        ))
-        self.add_item(discord.ui.Button(
-            label="Elvebredd",
-            style=discord.ButtonStyle.link,
-            url="https://elvebredd.com/",
-            emoji="📘"
-        ))
+
+    @discord.ui.button(label="SAB Values", style=discord.ButtonStyle.link, url="https://sabrvalues.com/", emoji="🌟")
+    async def sab(self, interaction: discord.Interaction, btn: discord.ui.Button):
+        pass
+
+    @discord.ui.button(label="GAG Values", style=discord.ButtonStyle.link, url="https://www.growagardencalculator.com/grow-a-garden-2/", emoji="🌱")
+    async def gag(self, interaction: discord.Interaction, btn: discord.ui.Button):
+        pass
+
+    @discord.ui.button(label="Elvebredd", style=discord.ButtonStyle.link, url="https://elvebredd.com/", emoji="🌿")
+    async def elvebredd(self, interaction: discord.Interaction, btn: discord.ui.Button):
+        pass
 
 class ReactionRolesView(discord.ui.View):
     def __init__(self):
@@ -604,6 +598,73 @@ class TradeView(discord.ui.View):
         await interaction.message.edit(embed=embed, view=self)
         await interaction.response.defer()
 
+class MercyView(discord.ui.View):
+    def __init__(self, target=None, author=None):
+        super().__init__(timeout=None)
+        self.target = target
+        self.author = author
+
+    @discord.ui.button(label="Accept", style=discord.ButtonStyle.success, custom_id="v:mercy_accept")
+    async def accept(self, interaction: discord.Interaction, button: discord.ui.Button):
+
+        if self.target and interaction.user.id != self.target.id:
+            return await interaction.response.send_message(
+                "❌ Only the targeted user can respond.",
+                ephemeral=True
+            )
+
+        role = interaction.guild.get_role(HITTER_ROLE_ID)
+
+        if role:
+            await interaction.user.add_roles(role)
+
+        embed = discord.Embed(
+            title="✅ Opportunity Accepted",
+            description=f"{interaction.user.mention} has accepted the opportunity and has been verified.",
+            color=discord.Color.green()
+        )
+
+        embed.set_footer(
+            text=f"{FOOTER} • Today at {discord.utils.utcnow().strftime('%I:%M %p')}"
+        )
+
+        for child in self.children:
+            child.disabled = True
+
+            if child.label == "Accept":
+                child.label = "Accepted"
+
+        await interaction.response.edit_message(embed=embed, view=self)
+
+        dm_embed = discord.Embed(
+            title="💫 Hitting Tutorial",
+            color=0x2b2d31
+        )
+
+        dm_embed.description = (
+            "You're a hitter now. A hitter is someone that got scammed by us, "
+            "and goes out to scam others. In other words, you're now a scammer."
+        )
+
+        dm_embed.add_field(
+            name="❓ What should I do?",
+            value=(
+                "You need to go and advertise trades on other servers. "
+                "Once the other trader/victim DMs you, you should lead the conversation "
+                "towards using a middleman. Once they agree, you'll send them our server "
+                "and create a ticket in <#1519421791167320166>. "
+                "Once you create the ticket, a random middleman will come assist you."
+            ),
+            inline=False
+        )
+
+        try:
+            await interaction.user.send(embed=dm_embed)
+        except:
+            pass
+
+
+# ─── Slash Commands ────────────────────────────────────────────────────────────
 
 @bot.tree.command(name="setupmiddleman", description="Post the MM request panel", guild=GUILD)
 async def setup_mm(interaction: discord.Interaction):
@@ -1271,74 +1332,67 @@ async def cmd_fill(interaction: discord.Interaction, user: discord.Member):
             content=f"✅ {user.mention} already has all roles up to their highest!")
 
 
+@bot.tree.command(name="flop", description="Log a flop", guild=GUILD)
+@app_commands.describe(flopper="Who did the flop?", the_flop="What is the flop?", split="Split details")
+async def cmd_flop(interaction: discord.Interaction, flopper: discord.Member, the_flop: str, split: str):
+    if not has_role(interaction.user, TICKET_STAFF):
+        await interaction.response.send_message("No permission.", ephemeral=True)
+        return
+        
+    embed = discord.Embed(color=0x2b2d31, title="💸 Flop Logged")
+    embed.add_field(name="👤 Flopper", value=flopper.mention, inline=True)
+    embed.add_field(name="💧 The Flop", value=the_flop, inline=True)
+    embed.add_field(name="✂️ Split", value=split, inline=True)
+    embed.add_field(name="📝 Logged By", value=interaction.user.mention, inline=False)
+    embed.set_footer(text=FOOTER)
+    await interaction.response.send_message(embed=embed)
+
+
+@bot.tree.command(name="altflop", description="Log an alt flop with image proof", guild=GUILD)
+@app_commands.describe(alt="The alt account used", the_flop="What is the flop?", notes="Additional notes", image="Screenshot/Proof of the flop")
+async def cmd_altflop(interaction: discord.Interaction, alt: discord.Member, the_flop: str, notes: str, image: discord.Attachment):
+    if not has_role(interaction.user, TICKET_STAFF):
+        await interaction.response.send_message("No permission.", ephemeral=True)
+        return
+        
+    if not image.content_type.startswith("image/"):
+        await interaction.response.send_message("The attached file must be an image.", ephemeral=True)
+        return
+
+    embed = discord.Embed(color=0x2b2d31, title="💸 Alt Flop Logged")
+    embed.add_field(name="👤 Alt Account", value=alt.mention, inline=True)
+    embed.add_field(name="💧 The Flop", value=the_flop, inline=True)
+    embed.add_field(name="📝 Notes", value=notes, inline=False)
+    embed.add_field(name="📝 Logged By", value=interaction.user.mention, inline=False)
+    embed.set_image(url=image.url)
+    embed.set_footer(text=FOOTER)
+    await interaction.response.send_message(embed=embed)
+
+
 HITTER_ROLE_ID = 1472343485687267416
 
-class MercyView(discord.ui.View):
-    def __init__(self, target=None, author=None):
-        super().__init__(timeout=None)
-        self.target = target
-        self.author = author
-
-    @discord.ui.button(label="Accept", style=discord.ButtonStyle.success, custom_id="v:mercy_accept")
-    async def accept(self, interaction: discord.Interaction, button: discord.ui.Button):
-
-        if self.target and interaction.user.id != self.target.id:
-            return await interaction.response.send_message(
-                "❌ Only the targeted user can respond.",
-                ephemeral=True
-            )
-
-        role = interaction.guild.get_role(HITTER_ROLE_ID)
-
-        if role:
-            await interaction.user.add_roles(role)
-
-        embed = discord.Embed(
-            title="✅ Opportunity Accepted",
-            description=f"{interaction.user.mention} has accepted the opportunity and has been verified.",
-            color=discord.Color.green()
-        )
-
-        embed.set_footer(
-            text=f"{FOOTER} • Today at {discord.utils.utcnow().strftime('%I:%M %p')}"
-        )
-
-        for child in self.children:
-            child.disabled = True
-
-            if child.label == "Accept":
-                child.label = "Accepted"
-
-        await interaction.response.edit_message(embed=embed, view=self)
-
-        dm_embed = discord.Embed(
-            title="💫 Hitting Tutorial",
-            color=0x2b2d31
-        )
-
-        dm_embed.description = (
-            "You're a hitter now. A hitter is someone that got scammed by us, "
-            "and goes out to scam others. In other words, you're now a scammer."
-        )
-
-        dm_embed.add_field(
-            name="❓ What should I do?",
-            value=(
-                "You need to go and advertise trades on other servers. "
-                "Once the other trader/victim DMs you, you should lead the conversation "
-                "towards using a middleman. Once they agree, you'll send them our server "
-                "and create a ticket in <#1519421791167320166>. "
-                "Once you create the ticket, a random middleman will come assist you."
-            ),
-            inline=False
-        )
-
-        try:
-            await interaction.user.send(embed=dm_embed)
-        except:
-            pass
+@bot.tree.command(name="mercy", description="Offer a mercy opportunity to a user", guild=GUILD)
+@app_commands.describe(user="User to offer mercy to")
+async def cmd_mercy(interaction: discord.Interaction, user: discord.Member):
+    if not has_role(interaction.user, MERCY_USE_ROLE):
+        await interaction.response.send_message("No permission.", ephemeral=True)
+        return
+    
+    embed = discord.Embed(
+        color=0x2b2d31,
+        title="💫 Mercy Opportunity",
+        description=f"{user.mention}, you have been given an opportunity."
+    )
+    embed.add_field(
+        name="⚠️ Decision",
+        value="Do you accept the terms and conditions presented to you? Click the button below to proceed.",
+        inline=False
+    )
+    embed.set_footer(text=FOOTER)
+    
+    await interaction.response.send_message(embed=embed, view=MercyView(target=user, author=interaction.user))
 
 
 if __name__ == "__main__":
     bot.run(TOKEN)
-
+```
