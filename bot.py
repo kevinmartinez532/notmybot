@@ -471,18 +471,24 @@ class MutationForgeView(discord.ui.View):
 class ValuesView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
-
-    @discord.ui.button(label="SAB Values", style=discord.ButtonStyle.link, url="https://sabrvalues.com/", emoji="🌟")
-    async def sab(self, interaction: discord.Interaction, btn: discord.ui.Button):
-        pass
-
-    @discord.ui.button(label="GAG Values", style=discord.ButtonStyle.link, url="https://www.growagardencalculator.com/grow-a-garden-2/", emoji="🌱")
-    async def gag(self, interaction: discord.Interaction, btn: discord.ui.Button):
-        pass
-
-    @discord.ui.button(label="Elvebredd", style=discord.ButtonStyle.link, url="https://elvebredd.com/", emoji="🌿")
-    async def elvebredd(self, interaction: discord.Interaction, btn: discord.ui.Button):
-        pass
+        self.add_item(discord.ui.Button(
+            label="SAB Values",
+            style=discord.ButtonStyle.link,
+            url="https://sabrvalues.com/",
+            emoji="🌟"
+        ))
+        self.add_item(discord.ui.Button(
+            label="GAG Values",
+            style=discord.ButtonStyle.link,
+            url="https://www.growagardencalculator.com/grow-a-garden-2/",
+            emoji="🌱"
+        ))
+        self.add_item(discord.ui.Button(
+            label="Elvebredd",
+            style=discord.ButtonStyle.link,
+            url="https://elvebredd.com/",
+            emoji="📘"
+        ))
 
 class ReactionRolesView(discord.ui.View):
     def __init__(self):
