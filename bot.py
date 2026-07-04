@@ -105,20 +105,20 @@ ban_cooldowns: dict = {}
 flop_counts: dict = {}
 
 def has_role(member: discord.Member, role_ids: list) -> bool:
-return any(r.id in role_ids for r in member.roles)
+    return any(r.id in role_ids for r in member.roles)
 
 def top_role_id(member: discord.Member):
-for rid in reversed(HIERARCHY):
-if any(r.id == rid for r in member.roles):
-return rid
-return None
+    for rid in reversed(HIERARCHY):
+        if any(r.id == rid for r in member.roles):
+            return rid
+    return None
 
 def can_manage_role(executor: discord.Member, target_role_id: int) -> bool:
-top = top_role_id(executor)
-if top not in PROMOTE_CEILING:
-return False
-ceiling = PROMOTE_CEILING[top]
-ceiling_idx = HIERARCHY.index(ceiling)
+    top = top_role_id(executor)
+    if top not in PROMOTE_CEILING:
+        return False
+    ceiling = PROMOTE_CEILING[top]
+    ceiling_idx = HIERARCHY.index(ceiling)
 try:
 target_idx = HIERARCHY.index(target_role_id)
 except ValueError:
