@@ -1,4 +1,3 @@
-```python
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -10,7 +9,6 @@ import datetime
 TOKEN = os.environ["BOT_TOKEN"]
 GUILD_ID = 1472343485687267408
 
-# ─── Role IDs ──────────────────────────────────────────────────────────────────
 ROLE = {
     "middleman":     1472343485695918100,
     "head_mid":      1472343485695918101,
@@ -28,14 +26,12 @@ ROLE = {
     "ban_perms":     1472343485704310795,
 }
 
-# Reaction Role IDs
 REACTION_ROLES = {
     "announcements": 1522943428005203998,
     "update": 1522943519575244800,
     "active": 1522946063592456222,
 }
 
-# Ordered lowest → highest for /managerole hierarchy
 HIERARCHY = [
     ROLE["middleman"],
     ROLE["head_mid"],
@@ -51,10 +47,8 @@ HIERARCHY = [
     ROLE["president"],
 ]
 
-# All hierarchy role IDs (for /temp and /fill)
 HIERARCHY_IDS = HIERARCHY[:]
 
-# Who can promote up to what ceiling
 PROMOTE_CEILING = {
     ROLE["co_founder"]:  ROLE["lead_mid"],
     ROLE["manager"]:     ROLE["co_founder"],
@@ -63,7 +57,6 @@ PROMOTE_CEILING = {
     ROLE["president"]:   ROLE["director"],
 }
 
-# ─── Channel IDs ───────────────────────────────────────────────────────────────
 CH = {
     "mm_setup":       1519421791167320166,
     "mm_ticket_cat":  1519448170336354366,
@@ -82,8 +75,6 @@ CH = {
 
 FOOTER = "Powered by Tsunami MM Services"
 
-
-# Staff groups
 ALL_STAFF    = list(ROLE.values())
 TICKET_STAFF = ALL_STAFF
 MM_CLAIM     = [ROLE["middleman"], ROLE["head_mid"], ROLE["manager"],
@@ -98,8 +89,6 @@ MM_PING      = [ROLE["middleman"]]
 
 active_trades: dict = {}
 ban_cooldowns: dict = {}
-
-# ─── Helpers ───────────────────────────────────────────────────────────────────
 
 def has_role(member: discord.Member, role_ids: list) -> bool:
     return any(r.id in role_ids for r in member.roles)
@@ -199,7 +188,6 @@ async def do_close(interaction: discord.Interaction, claimed_by: str = None, tic
     await asyncio.sleep(5)
     await ch.delete()
 
-# ─── Bot Setup ─────────────────────────────────────────────────────────────────
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
@@ -211,8 +199,6 @@ GUILD = discord.Object(id=GUILD_ID)
 @bot.event
 async def on_ready():
     await bot.tree.sync(guild=GUILD)
-
-# ─── Ticket Views ──────────────────────────────────────────────────────────────
 
 class MMTicketView(discord.ui.View):
     def __init__(self, creator: str = "Unknown"):
@@ -301,8 +287,6 @@ class SupportTicketView(discord.ui.View):
     async def close(self, interaction: discord.Interaction, btn: discord.ui.Button):
         await do_close(interaction, ticket_creator=self.creator)
 
-
-# ─── Panel Views ───────────────────────────────────────────────────────────────
 
 class MMRequestView(discord.ui.View):
     def __init__(self):
@@ -484,8 +468,6 @@ class MutationForgeView(discord.ui.View):
         super().__init__(timeout=None)
         self.add_item(MutationForgeSelect())
 
-# ─── Values View ───────────────────────────────────────────────────────────────
-
 class ValuesView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
@@ -501,8 +483,6 @@ class ValuesView(discord.ui.View):
     @discord.ui.button(label="Elvebredd", style=discord.ButtonStyle.link, url="https://elvebredd.com/", emoji="🌿")
     async def elvebredd(self, interaction: discord.Interaction, btn: discord.ui.Button):
         pass
-
-# ─── Reaction Roles View ──────────────────────────────────────────────────────
 
 class ReactionRolesView(discord.ui.View):
     def __init__(self):
@@ -540,8 +520,6 @@ class ReactionRolesView(discord.ui.View):
             else:
                 await interaction.user.add_roles(role)
                 await interaction.response.send_message(f"✅ Added {role.name}", ephemeral=True)
-
-# ─── Trade Confirmation View ───────────────────────────────────────────────────
 
 class TradeView(discord.ui.View):
     def __init__(self, t1: int, t2: int, mm: int):
@@ -620,8 +598,6 @@ class TradeView(discord.ui.View):
         await interaction.message.edit(embed=embed, view=self)
         await interaction.response.defer()
 
-
-# ─── Slash Commands ────────────────────────────────────────────────────────────
 
 @bot.tree.command(name="setupmiddleman", description="Post the MM request panel", guild=GUILD)
 async def setup_mm(interaction: discord.Interaction):
@@ -1103,8 +1079,6 @@ async def cmd_manageban(interaction: discord.Interaction, action: str,
         await log_ch.send(embed=embed)
 
 
-# ─── Info Commands ─────────────────────────────────────────────────────────────
-
 @bot.tree.command(name="rules", description="Display Tsunami MM Services Rules", guild=GUILD)
 async def cmd_rules(interaction: discord.Interaction):
     if not any(r.id == SETUP_ROLE for r in interaction.user.roles):
@@ -1220,10 +1194,6 @@ async def cmd_tos(interaction: discord.Interaction):
     await interaction.response.send_message("✅ Done.", ephemeral=True)
 
 
-
-
-# ─── /temp and /fill ─────────────────────────────────────────────────────────
-
 temp_removed: dict = {}
 
 @bot.tree.command(name="temp", description="Toggle your hierarchy roles on/off", guild=GUILD)
@@ -1295,13 +1265,7 @@ async def cmd_fill(interaction: discord.Interaction, user: discord.Member):
             content=f"✅ {user.mention} already has all roles up to their highest!")
 
 
-
-# ─── Mercy System ────────────────────────────────────────────────────────────
-
 HITTER_ROLE_ID = 1472343485687267416
-
-
-
 
 class MercyView(discord.ui.View):
     def __init__(self, target=None, author=None):
@@ -1368,8 +1332,6 @@ class MercyView(discord.ui.View):
         except:
             pass
 
-
-# ─── Run Bot ───────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     bot.run(TOKEN)
