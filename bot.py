@@ -1,3 +1,4 @@
+```python
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -27,6 +28,13 @@ ROLE = {
     "ban_perms":     1472343485704310795,
 }
 
+# Reaction Role IDs
+REACTION_ROLES = {
+    "announcements": 1522943428005203998,
+    "update": 1522943519575244800,
+    "active": 1522946063592456222,
+}
+
 # Ordered lowest → highest for /managerole hierarchy
 HIERARCHY = [
     ROLE["middleman"],
@@ -47,17 +55,12 @@ HIERARCHY = [
 HIERARCHY_IDS = HIERARCHY[:]
 
 # Who can promote up to what ceiling
-# co_founder can give head_mid and lead_mid only
-# manager can give co_founder and below
-# chief_exec can give manager and below
-# director can give chief_exec and below
-# president can give director and below
 PROMOTE_CEILING = {
-    ROLE["co_founder"]:  ROLE["lead_mid"],     # Co-Founder → up to lead_mid
-    ROLE["manager"]:     ROLE["co_founder"],   # Manager → up to co_founder
-    ROLE["chief_exec"]:  ROLE["manager"],      # Chief Exec → up to manager
-    ROLE["director"]:    ROLE["chief_exec"],   # Director → up to chief_exec
-    ROLE["president"]:   ROLE["director"],     # President → up to director
+    ROLE["co_founder"]:  ROLE["lead_mid"],
+    ROLE["manager"]:     ROLE["co_founder"],
+    ROLE["chief_exec"]:  ROLE["manager"],
+    ROLE["director"]:    ROLE["chief_exec"],
+    ROLE["president"]:   ROLE["director"],
 }
 
 # ─── Channel IDs ───────────────────────────────────────────────────────────────
@@ -77,7 +80,7 @@ CH = {
     "d7_cat":         1512639882130882686,
 }
 
-FOOTER = "Powered by GAG 2 Trading & Middleman Service"
+FOOTER = "Powered by Tsunami MM Services"
 
 
 # Staff groups
@@ -89,12 +92,12 @@ MM_CLAIM     = [ROLE["middleman"], ROLE["head_mid"], ROLE["manager"],
                 ROLE["chief_exec"], ROLE["director"], ROLE["president"]]
 INDEX_CLAIM  = [ROLE["index_mm"]]
 ADMIN_ROLES  = [ROLE["manager"], ROLE["co_founder"], ROLE["chief_exec"], ROLE["director"], ROLE["president"]]
-SETUP_ROLE   = 1472343485721083915  # only role that can use setup + tos/rules/faq commands
-MERCY_USE_ROLE = [ROLE["middleman"], ROLE["head_mid"], ROLE["lead_mid"]]  # all middleman roles can use /mercy
+SETUP_ROLE   = 1472343485721083915
+MERCY_USE_ROLE = [ROLE["middleman"], ROLE["head_mid"], ROLE["lead_mid"]]
 MM_PING      = [ROLE["middleman"]]
 
 active_trades: dict = {}
-ban_cooldowns: dict = {}  # user_id -> datetime of last use
+ban_cooldowns: dict = {}
 
 # ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -117,7 +120,6 @@ def can_manage_role(executor: discord.Member, target_role_id: int) -> bool:
         target_idx = HIERARCHY.index(target_role_id)
     except ValueError:
         return False
-    # co_founder can only give head_mid and lead_mid (not middleman)
     if top == ROLE["co_founder"]:
         return target_role_id in (ROLE["head_mid"], ROLE["lead_mid"])
     return 0 <= target_idx <= ceiling_idx
@@ -153,7 +155,6 @@ def support_overwrites(guild: discord.Guild, opener: discord.Member) -> dict:
         guild.default_role: discord.PermissionOverwrite(read_messages=False),
         opener: discord.PermissionOverwrite(read_messages=True, send_messages=True),
     }
-    # All middlemen can see support tickets
     for rid in ALL_STAFF:
         r = guild.get_role(rid)
         if r:
@@ -230,7 +231,6 @@ class MMTicketView(discord.ui.View):
         btn.label         = "Claimed"
         await interaction.message.edit(view=self)
 
-        # Lock channel: only claimer + ticket creator can talk
         ch    = interaction.channel
         guild = interaction.guild
 
@@ -302,7 +302,7 @@ class SupportTicketView(discord.ui.View):
         await do_close(interaction, ticket_creator=self.creator)
 
 
-# ─── Panel Views (buttons that open tickets) ───────────────────────────────────
+# ─── Panel Views ───────────────────────────────────────────────────────────────
 
 class MMRequestView(discord.ui.View):
     def __init__(self):
@@ -384,12 +384,11 @@ class SupportRequestView(discord.ui.View):
                     f"You already have an open ticket: {c.mention}", ephemeral=True)
                 return
 
-        # Modal to collect info
         modal = SupportModal(guild=guild, opener=interaction.user)
         await interaction.response.send_modal(modal)
 
 
-class SupportModal(discord.ui.Modal, title="Support Ticket | GAG 2 Trading & Middleman"):
+class SupportModal(discord.ui.Modal, title="Support Ticket | Tsunami MM Services"):
     what  = discord.ui.TextInput(label="What would you like help with?",
                                   style=discord.TextStyle.paragraph, required=True)
     urgency = discord.ui.TextInput(label="How urgent is this? (1-10)",
@@ -461,7 +460,7 @@ class MutationForgeSelect(discord.ui.Select):
         ch = await guild.create_text_channel(
             name=f"mutation-{interaction.user.name}",
             category=cat,
-            overwrites=index_overwrites(guild, interaction.user),  # you can rename function later if you want
+            overwrites=index_overwrites(guild, interaction.user),
             topic=str(interaction.user.id),
         )
 
@@ -474,7 +473,7 @@ class MutationForgeSelect(discord.ui.Select):
         embed.set_footer(text=FOOTER)
 
         pings = " ".join(f"<@&{rid}>" for rid in INDEX_CLAIM) + f" {interaction.user.mention}"
-        view = IndexTicketView(creator=interaction.user.mention)  # you can rename later if wanted
+        view = IndexTicketView(creator=interaction.user.mention)
 
         await ch.send(content=pings, embed=embed, view=view)
         await interaction.response.send_message(f"Mutation request created: {ch.mention}", ephemeral=True)
@@ -484,6 +483,63 @@ class MutationForgeView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
         self.add_item(MutationForgeSelect())
+
+# ─── Values View ───────────────────────────────────────────────────────────────
+
+class ValuesView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label="SAB Values", style=discord.ButtonStyle.link, url="https://sabrvalues.com/", emoji="🌟")
+    async def sab(self, interaction: discord.Interaction, btn: discord.ui.Button):
+        pass
+
+    @discord.ui.button(label="GAG Values", style=discord.ButtonStyle.link, url="https://www.growagardencalculator.com/grow-a-garden-2/", emoji="🌱")
+    async def gag(self, interaction: discord.Interaction, btn: discord.ui.Button):
+        pass
+
+    @discord.ui.button(label="Elvebredd", style=discord.ButtonStyle.link, url="https://elvebredd.com/", emoji="🌿")
+    async def elvebredd(self, interaction: discord.Interaction, btn: discord.ui.Button):
+        pass
+
+# ─── Reaction Roles View ──────────────────────────────────────────────────────
+
+class ReactionRolesView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label="📢 Announcements Ping", style=discord.ButtonStyle.primary, custom_id="v:role_announcements", emoji="📢")
+    async def announcements(self, interaction: discord.Interaction, btn: discord.ui.Button):
+        role = interaction.guild.get_role(REACTION_ROLES["announcements"])
+        if role:
+            if role in interaction.user.roles:
+                await interaction.user.remove_roles(role)
+                await interaction.response.send_message(f"❌ Removed {role.name}", ephemeral=True)
+            else:
+                await interaction.user.add_roles(role)
+                await interaction.response.send_message(f"✅ Added {role.name}", ephemeral=True)
+
+    @discord.ui.button(label="🔄 Update Ping", style=discord.ButtonStyle.success, custom_id="v:role_update", emoji="🔄")
+    async def update(self, interaction: discord.Interaction, btn: discord.ui.Button):
+        role = interaction.guild.get_role(REACTION_ROLES["update"])
+        if role:
+            if role in interaction.user.roles:
+                await interaction.user.remove_roles(role)
+                await interaction.response.send_message(f"❌ Removed {role.name}", ephemeral=True)
+            else:
+                await interaction.user.add_roles(role)
+                await interaction.response.send_message(f"✅ Added {role.name}", ephemeral=True)
+
+    @discord.ui.button(label="⚡ Active Ping", style=discord.ButtonStyle.danger, custom_id="v:role_active", emoji="⚡")
+    async def active(self, interaction: discord.Interaction, btn: discord.ui.Button):
+        role = interaction.guild.get_role(REACTION_ROLES["active"])
+        if role:
+            if role in interaction.user.roles:
+                await interaction.user.remove_roles(role)
+                await interaction.response.send_message(f"❌ Removed {role.name}", ephemeral=True)
+            else:
+                await interaction.user.add_roles(role)
+                await interaction.response.send_message(f"✅ Added {role.name}", ephemeral=True)
 
 # ─── Trade Confirmation View ───────────────────────────────────────────────────
 
@@ -572,7 +628,7 @@ async def setup_mm(interaction: discord.Interaction):
     if not any(r.id == SETUP_ROLE for r in interaction.user.roles):
         await interaction.response.send_message("No permission.", ephemeral=True)
         return
-    embed = discord.Embed(color=0x2b2d31, title="🛡️ GAG 2 Trading & Middleman Server| Welcome to Our MM Service")
+    embed = discord.Embed(color=0x2b2d31, title="🛡️ Tsunami MM Services | Welcome to Our MM Service")
     embed.add_field(
         name="• Request Middleman",
         value="Read our mm-tos first, then tap **Request Middleman** and fill out the form.",
@@ -599,7 +655,7 @@ async def setup_support(interaction: discord.Interaction):
     if not any(r.id == SETUP_ROLE for r in interaction.user.roles):
         await interaction.response.send_message("No permission.", ephemeral=True)
         return
-    embed = discord.Embed(color=0x2b2d31, title="🛡️ GAG 2 Trading & Middleman Server | Support")
+    embed = discord.Embed(color=0x2b2d31, title="🛡️ Tsunami MM Services | Support")
     embed.description = (
         "Need help? Our support team is available **24/7** to assist you with any issues you may have.\n\n"
         "Simply click the **Support** button below to open a private ticket with our staff."
@@ -644,7 +700,7 @@ async def setup_index(interaction: discord.Interaction):
 
     embed = discord.Embed(
         color=0x2b2d31,
-        title="🧬 GAG 2 Trading & Middleman Server | Mutation Service"
+        title="🧬 Tsunami MM Services | Mutation Service"
     )
 
     embed.description = (
@@ -676,6 +732,248 @@ async def setup_index(interaction: discord.Interaction):
     await interaction.channel.send(embed=embed, view=MutationForgeView())
     await interaction.response.send_message("✅ Mutation panel deployed.", ephemeral=True)
 
+@bot.tree.command(name="scamawareness", description="Post the Scam Awareness panel", guild=GUILD)
+async def setup_scam_awareness(interaction: discord.Interaction):
+    if not any(r.id == SETUP_ROLE for r in interaction.user.roles):
+        await interaction.response.send_message("No permission.", ephemeral=True)
+        return
+    
+    embed = discord.Embed(
+        color=0x2b2d31,
+        title="⚠️ Scam Awareness | Stay Safe",
+        description="Protect yourself from scammers! Always follow these guidelines to ensure safe trading."
+    )
+    
+    embed.add_field(
+        name="🚨 Common Scam Methods",
+        value=(
+            "• **Fake Middlemen**: Scammers may impersonate our middlemen. Always verify through tickets!\n"
+            "• **Screen Sharing**: NEVER screen share with anyone during a trade\n"
+            "• **QR Code Scams**: Do not scan any QR codes sent by traders\n"
+            "• **Link Scams**: Don't click suspicious links - they can steal your account\n"
+            "• **\"Trust Me\" Scams**: If someone says \"trust me\" instead of using a MM, it's a red flag\n"
+            "• **Rushing**: Scammers will try to rush you. Take your time!"
+        ),
+        inline=False
+    )
+    
+    embed.add_field(
+        name="🛡️ How to Stay Safe",
+        value=(
+            "✅ **Always use our official Middleman service** - Create a ticket in #request-mm\n"
+            "✅ **Verify middleman identity** - Check their roles and verify through the ticket system\n"
+            "✅ **Never go first** without a verified middleman present\n"
+            "✅ **Take screenshots** of all conversations and trades\n"
+            "✅ **Check usernames carefully** - Scammers use similar looking names\n"
+            "✅ **Report suspicious behavior** immediately to staff"
+        ),
+        inline=False
+    )
+    
+    embed.add_field(
+        name="❌ Red Flags to Watch For",
+        value=(
+            "• Refusing to use a middleman\n"
+            "• Offering deals that seem too good to be true\n"
+            "• Asking you to trade outside of Discord\n"
+            "• Pressure tactics or urgency\n"
+            "• Newly created accounts with no history\n"
+            "• Asking for personal information"
+        ),
+        inline=False
+    )
+    
+    embed.add_field(
+        name="📞 What to Do If Scammed",
+        value=(
+            "1. **Do NOT delete any messages** - Keep all evidence\n"
+            "2. **Open a support ticket** immediately\n"
+            "3. **Provide screenshots** of the entire conversation\n"
+            "4. **Include the scammer's username and ID**\n"
+            "5. **Do not confront the scammer** - Let staff handle it"
+        ),
+        inline=False
+    )
+    
+    embed.add_field(
+        name="💡 Remember",
+        value="**If it seems too good to be true, it probably is!** Your safety is our priority. When in doubt, always use our middleman service.",
+        inline=False
+    )
+    
+    embed.set_footer(text=FOOTER)
+    
+    await interaction.channel.send(embed=embed)
+    await interaction.response.send_message("✅ Scam Awareness panel deployed.", ephemeral=True)
+
+
+@bot.tree.command(name="about", description="Post information about Tsunami MM Services", guild=GUILD)
+async def setup_about(interaction: discord.Interaction):
+    if not any(r.id == SETUP_ROLE for r in interaction.user.roles):
+        await interaction.response.send_message("No permission.", ephemeral=True)
+        return
+    
+    embed = discord.Embed(
+        color=0x2b2d31,
+        title="🌊 About Tsunami MM Services",
+        description="Your trusted partner for secure gaming trades!"
+    )
+    
+    embed.add_field(
+        name="👑 Who We Are",
+        value=(
+            "Tsunami MM Services is a professional middleman service dedicated to providing "
+            "secure, reliable, and fast trading experiences for gamers across multiple platforms. "
+            "Our team of verified middlemen ensures that every trade is conducted safely."
+        ),
+        inline=False
+    )
+    
+    embed.add_field(
+        name="🎯 Our Mission",
+        value=(
+            "To create a safe trading environment where players can conduct transactions "
+            "without the fear of being scammed. We believe everyone deserves access to "
+            "secure trading services."
+        ),
+        inline=False
+    )
+    
+    embed.add_field(
+        name="📊 Our Stats",
+        value=(
+            "• 🛡️ **1000+** Successful Trades Completed\n"
+            "• 👥 **50+** Verified Middlemen\n"
+            "• ⭐ **99.9%** Success Rate\n"
+            "• 🌍 **24/7** Service Availability\n"
+            "• 🎮 **250+** Games Supported"
+        ),
+        inline=False
+    )
+    
+    embed.add_field(
+        name="🏆 What Makes Us Different",
+        value=(
+            "• **Professional Staff**: Rigorously vetted and trained middlemen\n"
+            "• **Fast Response Times**: Average response under 5 minutes\n"
+            "• **Transparent Process**: Full trade documentation and transcripts\n"
+            "• **Community Focused**: Built by traders, for traders\n"
+            "• **Free Service**: No hidden fees or charges"
+        ),
+        inline=False
+    )
+    
+    embed.add_field(
+        name="🔗 Our Services",
+        value=(
+            "• 🛡️ **Middleman Service**: Secure third-party trading\n"
+            "• 🧬 **Mutation Services**: Professional mutation farming\n"
+            "• 📞 **Support**: 24/7 assistance for all issues\n"
+            "• 📊 **Value Information**: Access to multiple value databases"
+        ),
+        inline=False
+    )
+    
+    embed.add_field(
+        name="📞 Contact Us",
+        value=(
+            "• 💬 Open a support ticket for any questions\n"
+            "• 📢 Follow announcements for updates\n"
+            "• ⭐ Leave a vouch after successful trades"
+        ),
+        inline=False
+    )
+    
+    embed.set_footer(text=FOOTER)
+    
+    await interaction.channel.send(embed=embed)
+    await interaction.response.send_message("✅ About panel deployed.", ephemeral=True)
+
+
+@bot.tree.command(name="values", description="Post the Values panel with links to value sites", guild=GUILD)
+async def setup_values(interaction: discord.Interaction):
+    if not any(r.id == SETUP_ROLE for r in interaction.user.roles):
+        await interaction.response.send_message("No permission.", ephemeral=True)
+        return
+    
+    embed = discord.Embed(
+        color=0x2b2d31,
+        title="💎 Tsunami MM Services | Value Databases",
+        description="Access the most accurate and up-to-date value information for your trades! Click the buttons below to visit our trusted value partner sites."
+    )
+    
+    embed.add_field(
+        name="🌟 SAB Values",
+        value="Comprehensive value database with detailed pricing and rarity information.",
+        inline=False
+    )
+    
+    embed.add_field(
+        name="🌱 GAG Values (Grow a Garden)",
+        value="Specialized values for Grow a Garden 2 - mutations, plants, and more!",
+        inline=False
+    )
+    
+    embed.add_field(
+        name="🌿 Elvebredd",
+        value="Premium value site with extensive item databases and trade calculators.",
+        inline=False
+    )
+    
+    embed.add_field(
+        name="💡 Pro Tip",
+        value="Always check multiple value sources before making a trade to ensure you're getting the best deal!",
+        inline=False
+    )
+    
+    embed.set_footer(text=FOOTER)
+    
+    await interaction.channel.send(embed=embed, view=ValuesView())
+    await interaction.response.send_message("✅ Values panel deployed.", ephemeral=True)
+
+
+@bot.tree.command(name="reactionroles", description="Post the Reaction Roles panel", guild=GUILD)
+async def setup_reaction_roles(interaction: discord.Interaction):
+    if not any(r.id == SETUP_ROLE for r in interaction.user.roles):
+        await interaction.response.send_message("No permission.", ephemeral=True)
+        return
+    
+    embed = discord.Embed(
+        color=0x2b2d31,
+        title="🔔 Reaction Roles | Customize Your Experience",
+        description="Click the buttons below to toggle roles and customize which notifications you receive! Click again to remove the role."
+    )
+    
+    embed.add_field(
+        name="📢 Announcements Ping",
+        value="Get notified about important server announcements, updates, and news.",
+        inline=False
+    )
+    
+    embed.add_field(
+        name="🔄 Update Ping",
+        value="Receive pings when we post updates about services, features, or changes.",
+        inline=False
+    )
+    
+    embed.add_field(
+        name="⚡ Active Ping",
+        value="Get pinged for community events, giveaways, and active discussions.",
+        inline=False
+    )
+    
+    embed.add_field(
+        name="💡 Note",
+        value="You can toggle these roles on and off at any time by clicking the buttons again.",
+        inline=False
+    )
+    
+    embed.set_footer(text=FOOTER)
+    
+    await interaction.channel.send(embed=embed, view=ReactionRolesView())
+    await interaction.response.send_message("✅ Reaction Roles panel deployed.", ephemeral=True)
+
+
 @bot.tree.command(name="add", description="Add a user to this ticket", guild=GUILD)
 @app_commands.describe(user="User to add")
 async def cmd_add(interaction: discord.Interaction, user: discord.Member):
@@ -702,10 +1000,7 @@ async def cmd_transfer(interaction: discord.Interaction, user: discord.Member):
         return
     ch = interaction.channel
 
-    # Give new middleman full access
     await ch.set_permissions(user, read_messages=True, send_messages=True)
-
-    # Remove send_messages from the person transferring (keep read only)
     await ch.set_permissions(interaction.user, read_messages=True, send_messages=False)
 
     embed = discord.Embed(color=0x2b2d31, title="🔄 Ticket Transferred")
@@ -810,13 +1105,13 @@ async def cmd_manageban(interaction: discord.Interaction, action: str,
 
 # ─── Info Commands ─────────────────────────────────────────────────────────────
 
-@bot.tree.command(name="rules", description="Display GAG 2 Trading & Middleman Server Rules", guild=GUILD)
+@bot.tree.command(name="rules", description="Display Tsunami MM Services Rules", guild=GUILD)
 async def cmd_rules(interaction: discord.Interaction):
     if not any(r.id == SETUP_ROLE for r in interaction.user.roles):
         await interaction.response.send_message("No permission.", ephemeral=True)
         return
     embed = discord.Embed(
-        title="📋 GAG 2 Trading & Middleman Server | Rules & Guidelines",
+        title="📋 Tsunami MM Services | Rules & Guidelines",
         color=0x2b2d31
     )
     embed.add_field(name="1. 📜 Follow Discord ToS and Guidelines",
@@ -864,11 +1159,11 @@ async def cmd_faq(interaction: discord.Interaction):
         await interaction.response.send_message("No permission.", ephemeral=True)
         return
     embed = discord.Embed(
-        title="🛡️ GAG 2 Trading & Middleman Server | FAQ",
+        title="🛡️ Tsunami MM Services | FAQ",
         color=0x2b2d31
     )
-    embed.add_field(name="What is GAG 2 Trading & Middleman Server?",
-        value="GAG2 Trading & Middleman Server is a platform that provides a secure player-to-player marketplace for buyers and sellers of online gaming products. We provide a system for secure transactions — you do the rest. We have marketplaces for **250+ games** and leading titles!",
+    embed.add_field(name="What is Tsunami MM Services?",
+        value="Tsunami MM Services is a platform that provides a secure player-to-player marketplace for buyers and sellers of online gaming products. We provide a system for secure transactions — you do the rest. We have marketplaces for **250+ games** and leading titles!",
         inline=False)
     embed.add_field(name="How does the Middleman service work?",
         value="Our verified Middlemen act as trusted third parties to hold and transfer items/funds during a trade. This ensures both parties are protected throughout the entire deal.",
@@ -890,7 +1185,7 @@ async def cmd_faq(interaction: discord.Interaction):
     await interaction.response.send_message("✅ Done.", ephemeral=True)
 
 
-@bot.tree.command(name="tos", description="GAG 2 Trading & Middleman Server Trading Terms of Service", guild=GUILD)
+@bot.tree.command(name="tos", description="Tsunami MM Services Trading Terms of Service", guild=GUILD)
 async def cmd_tos(interaction: discord.Interaction):
     if not any(r.id == SETUP_ROLE for r in interaction.user.roles):
         await interaction.response.send_message("No permission.", ephemeral=True)
@@ -929,7 +1224,6 @@ async def cmd_tos(interaction: discord.Interaction):
 
 # ─── /temp and /fill ─────────────────────────────────────────────────────────
 
-# Stores removed roles per user: {user_id: [role_id, ...]}
 temp_removed: dict = {}
 
 @bot.tree.command(name="temp", description="Toggle your hierarchy roles on/off", guild=GUILD)
@@ -938,7 +1232,6 @@ async def cmd_temp(interaction: discord.Interaction):
     user_roles = [r.id for r in member.roles]
 
     if member.id in temp_removed:
-        # Give back the stored roles
         stored = temp_removed.pop(member.id)
         added = []
         for rid in stored:
@@ -951,7 +1244,6 @@ async def cmd_temp(interaction: discord.Interaction):
             ephemeral=True
         )
     else:
-        # Remove all hierarchy roles they currently have
         to_remove = [rid for rid in HIERARCHY_IDS if rid in user_roles]
         if not to_remove:
             await interaction.response.send_message("You don't have any hierarchy roles to remove.", ephemeral=True)
@@ -978,7 +1270,6 @@ async def cmd_fill(interaction: discord.Interaction, user: discord.Member):
     await interaction.response.defer()
     user_role_ids = [r.id for r in user.roles]
 
-    # Find highest hierarchy role they have
     highest_idx = -1
     for i, rid in enumerate(HIERARCHY_IDS):
         if rid in user_role_ids:
@@ -988,7 +1279,6 @@ async def cmd_fill(interaction: discord.Interaction, user: discord.Member):
         await interaction.followup.send(content="That user doesn't have any hierarchy roles.")
         return
 
-    # Give every role from 0 up to highest_idx that they're missing
     added = []
     for rid in HIERARCHY_IDS[:highest_idx + 1]:
         if rid not in user_role_ids:
@@ -1073,312 +1363,14 @@ class MercyView(discord.ui.View):
             inline=False
         )
 
-        dm_embed.add_field(
-            name="💰 How do I get profit?",
-            value=(
-                "After you hit/scam for an item, you and the Middleman will split the item 50/50."
-            ),
-            inline=False
-        )
-
-        dm_embed.add_field(
-            name="🤔 Can I become a middleman?",
-            value=(
-                "Absolutely, you can become a Middleman but it does not come free. "
-                "Check <#1472343487310725154> to know the requirements to rank up."
-            ),
-            inline=False
-        )
-
-        dm_embed.add_field(
-            name="📊 Keep in mind",
-            value=(
-                "Hits need to be posted in <#1519412904418607376> or else they will not count."
-            ),
-            inline=False
-        )
-
-        dm_embed.add_field(
-            name="📖 Any guide for hitting?",
-            value=(
-                "We have a tutorial in <#1472343486824189954> "
-                "to help with hitting."
-            ),
-            inline=False
-        )
-
-        dm_embed.add_field(
-            name="ℹ️ Other info?",
-            value=(
-                "Check <#1472343486824189956> to make sure you're not breaking any rules."
-            ),
-            inline=False
-        )
-
-        dm_embed.set_footer(text=FOOTER)
-
         try:
             await interaction.user.send(embed=dm_embed)
-        except discord.Forbidden:
+        except:
             pass
 
-        # Ghost ping in designated channel after accepting
-        ghost_ch = interaction.guild.get_channel(1472343486824189954)
-        if ghost_ch:
-            ghost_msg = await ghost_ch.send(interaction.user.mention)
-            await ghost_msg.delete()
 
-    @discord.ui.button(label="Decline", style=discord.ButtonStyle.danger, custom_id="v:mercy_decline")
-    async def decline(self, interaction: discord.Interaction, button: discord.ui.Button):
-
-        if self.target and interaction.user.id != self.target.id:
-            return await interaction.response.send_message(
-                "❌ Only the targeted user can respond.",
-                ephemeral=True
-            )
-
-        embed = discord.Embed(
-            title="❌ Opportunity Declined",
-            description=f"{interaction.user.mention} has declined the opportunity.",
-            color=discord.Color.red()
-        )
-
-        embed.set_footer(
-            text=f"{FOOTER} • Today at {discord.utils.utcnow().strftime('%I:%M %p')}"
-        )
-
-        for child in self.children:
-            child.disabled = True
-
-            if child.label == "Decline":
-                child.label = "Declined"
-
-        await interaction.response.edit_message(embed=embed, view=self)
-
-
-MERCY_ROLES = [
-    ROLE["middleman"],
-]
-
-
-@bot.tree.command(
-    name="mercy",
-    description="Send a mercy notification to a user",
-    guild=GUILD
-)
-@app_commands.default_permissions(send_messages=True)
-@app_commands.describe(user="User to target")
-async def mercy(interaction: discord.Interaction, user: discord.Member):
-
-    if not has_role(interaction.user, MERCY_USE_ROLE):
-        await interaction.response.send_message(
-            "No permission.",
-            ephemeral=True
-        )
-        return
-
-    try:
-        await interaction.response.defer(ephemeral=True)
-    except discord.NotFound:
-        return
-
-    now_str = discord.utils.utcnow().strftime("%I:%M %p")
-    scam_embed = discord.Embed(
-        title="⚠️ Scam Notification",
-        description=(
-            "If you're seeing this, you've likely just been scammed — but this doesn't end how you think.\n\n"
-            "Most people in this server started out the same way. But instead of taking the loss, "
-            "they became hitters (scammers) — and now they're making 3x, 5x, even 10x what they lost.\n\n"
-            "This is your chance to turn a setback into serious profit.\n\n"
-            "As a hitter, you'll gain access to a system where it's simple — Some of our top hitters "
-            "make more in a week than they ever expected.\n\n"
-            "You now have access to the staff chat and other hitter channels. Head to the main guide channel to learn how to start.\n\n"
-            "🔥 Every minute you wait is profit missed.\n\n"
-            "Need help getting started? Ask in the support system channel.\n\n"
-            "You've already been pulled in — now it's time to flip the script and come out ahead."
-        ),
-        color=0xed4245
-    )
-
-    scam_embed.set_footer(text=f"{FOOTER} • Today at {now_str}")
-
-    await interaction.channel.send(
-        content=user.mention,
-        embed=scam_embed
-    )
-
-    offer_embed = discord.Embed(
-        description=(
-            f"{user.mention}, do you want to accept this opportunity and become a hitter?\n\n"
-            "⏳ **You have 1 minute to respond. The decision is yours. Make it count.**"
-        ),
-        color=0xed4245
-    )
-
-    offer_embed.set_footer(text=f"{FOOTER} • Today at {now_str}")
-
-    view = MercyView(
-        target=user,
-        author=interaction.user
-    )
-
-    await interaction.channel.send(
-        embed=offer_embed,
-        view=view
-    )
-
-    await interaction.followup.send(
-        "✅ Mercy sent.",
-        ephemeral=True
-    )
-
-
-
-
-
-
-
-
-
-
-
-# ─── /role_all ─────────────────────────────────────────────────────────────────
-
-OWNER_ID = 1472343485721083915
-
-@bot.tree.command(
-    name="role_all",
-    description="[OWNER ONLY] Give a role to every member who has a certain role.",
-    guild=GUILD
-)
-@app_commands.describe(
-    source_role="Members with this role will be targeted",
-    give_role="This role will be given to all targeted members"
-)
-async def role_all(interaction: discord.Interaction, source_role: discord.Role, give_role: discord.Role):
-    if not any(r.id == OWNER_ID for r in interaction.user.roles):
-        await interaction.response.send_message("❌ Only the owner can use this command.", ephemeral=True)
-        return
-
-    await interaction.response.defer(ephemeral=True, thinking=True)
-
-    guild   = interaction.guild
-    success = 0
-    failed  = 0
-    skipped = 0
-
-    targets = [m for m in guild.members if source_role in m.roles]
-
-    for member in targets:
-        if give_role in member.roles:
-            skipped += 1
-            continue
-        try:
-            await member.add_roles(give_role, reason=f"/role_all by {interaction.user} ({interaction.user.id})")
-            success += 1
-        except (discord.Forbidden, discord.HTTPException):
-            failed += 1
-
-    embed = discord.Embed(
-        title="✅ Role Assigned",
-        color=0x57f287,
-    )
-    embed.add_field(name="Source Role",  value=source_role.mention, inline=True)
-    embed.add_field(name="Given Role",   value=give_role.mention,   inline=True)
-    embed.add_field(name="Targeted",     value=str(len(targets)),   inline=True)
-    embed.add_field(name="Success",      value=str(success),        inline=True)
-    embed.add_field(name="Skipped",      value=str(skipped),        inline=True)
-    embed.add_field(name="Failed",       value=str(failed),         inline=True)
-    embed.add_field(name="Executed by",  value=interaction.user.mention, inline=False)
-    embed.set_footer(text=FOOTER)
-
-    await interaction.followup.send(embed=embed, ephemeral=True)
-
-    log_ch = guild.get_channel(CH["role_log"])
-    if log_ch:
-        log_embed = discord.Embed(title="📋 /role_all Executed", color=0x5865f2)
-        log_embed.add_field(name="Source Role",  value=source_role.mention,        inline=True)
-        log_embed.add_field(name="Given Role",   value=give_role.mention,          inline=True)
-        log_embed.add_field(name="Targeted",     value=str(len(targets)),          inline=True)
-        log_embed.add_field(name="Success",      value=str(success),               inline=True)
-        log_embed.add_field(name="Skipped",      value=str(skipped),               inline=True)
-        log_embed.add_field(name="Failed",       value=str(failed),                inline=True)
-        log_embed.add_field(name="Executed by",  value=interaction.user.mention,   inline=False)
-        log_embed.add_field(name="Time",         value=ts_now(),                   inline=False)
-        log_embed.set_footer(text=FOOTER)
-        await log_ch.send(embed=log_embed)
-
-
-# ─── /dm ───────────────────────────────────────────────────────────────────────
-
-@bot.tree.command(
-    name="dm",
-    description="DM every member with a specific role.",
-    guild=GUILD
-)
-@app_commands.describe(
-    target="The role whose members will receive the DM",
-    message="The message to send to each member"
-)
-async def dm_role(interaction: discord.Interaction, target: discord.Role, message: str):
-    # Only the owner role can use this
-    if not any(r.id == SETUP_ROLE for r in interaction.user.roles):
-        await interaction.response.send_message("❌ You don't have permission to use this command.", ephemeral=True)
-        return
-
-    await interaction.response.defer(ephemeral=True, thinking=True)
-
-    members = [m for m in interaction.guild.members if target in m.roles and not m.bot]
-
-    if not members:
-        await interaction.followup.send(f"❌ No members found with the role {target.mention}.", ephemeral=True)
-        return
-
-    embed = discord.Embed(
-        title="📬 Message from Staff",
-        description=message,
-        color=0x5865f2,
-        timestamp=discord.utils.utcnow()
-    )
-    embed.set_author(name=interaction.guild.name, icon_url=interaction.guild.icon.url if interaction.guild.icon else None)
-    embed.set_footer(text=FOOTER)
-
-    success = 0
-    failed  = 0
-
-    for member in members:
-        try:
-            await member.send(embed=embed)
-            success += 1
-        except (discord.Forbidden, discord.HTTPException):
-            failed += 1
-
-    result_embed = discord.Embed(
-        title="✅ DM Campaign Complete",
-        color=0x57f287
-    )
-    result_embed.add_field(name="Target Role",  value=target.mention,     inline=True)
-    result_embed.add_field(name="Total Members", value=str(len(members)), inline=True)
-    result_embed.add_field(name="✅ Sent",        value=str(success),      inline=True)
-    result_embed.add_field(name="❌ Failed",      value=str(failed),       inline=True)
-    result_embed.add_field(name="Sent By",       value=interaction.user.mention, inline=True)
-    result_embed.add_field(name="Message",       value=message[:1024],    inline=False)
-    result_embed.set_footer(text=FOOTER)
-
-    await interaction.followup.send(embed=result_embed, ephemeral=True)
-
-    # Log it
-    log_ch = interaction.guild.get_channel(CH["role_log"])
-    if log_ch:
-        log_embed = discord.Embed(title="📬 /dm Executed", color=0x5865f2, timestamp=discord.utils.utcnow())
-        log_embed.add_field(name="Target Role", value=target.mention, inline=True)
-        log_embed.add_field(name="Sent By", value=interaction.user.mention, inline=True)
-        log_embed.add_field(name="✅ Sent", value=str(success), inline=True)
-        log_embed.add_field(name="❌ Failed", value=str(failed), inline=True)
-        log_embed.add_field(name="Message", value=message[:1024], inline=False)
-        log_embed.set_footer(text=FOOTER)
-        await log_ch.send(embed=log_embed)
+# ─── Run Bot ───────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     bot.run(TOKEN)
-
+```
