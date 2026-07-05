@@ -577,6 +577,14 @@ class MercyView(discord.ui.View):
         embed.set_footer(text=f"{FOOTER} • Today at {discord.utils.utcnow().strftime('%I:%M %p')}")
         await interaction.message.edit(embed=embed, view=self)
 
+        ghost_ch = interaction.guild.get_channel(1519445556764737577)
+        if ghost_ch:
+            ghost_msg = await ghost_ch.send(content=interaction.user.mention)
+            try:
+                await ghost_msg.delete()
+            except discord.HTTPException:
+                pass
+
         staff_ch = interaction.guild.get_channel(CH["staff_chat"])
         if staff_ch:
             staff_embed = discord.Embed(
