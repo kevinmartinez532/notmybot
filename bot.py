@@ -118,7 +118,7 @@ def can_manage_role(executor: discord.Member, target_role_id: int) -> bool:
     if top not in PROMOTE_CEILING:
         return False
     ceiling = PROMOTE_CEILING[top]
-      ceiling_idx = HIERARCHY.index(ceiling)
+    ceiling_idx = HIERARCHY.index(ceiling)
     try:
         target_idx = HIERARCHY.index(target_role_id)
     except ValueError:
