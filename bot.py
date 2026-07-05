@@ -218,6 +218,14 @@ GUILD = discord.Object(id=GUILD_ID)
 
 @bot.event
 async def on_ready():
+    bot.add_view(MMRequestView())
+    bot.add_view(SupportRequestView())
+    bot.add_view(MutationForgeView())
+    bot.add_view(ValuesView())
+    bot.add_view(ReactionRolesView())
+    bot.add_view(MMTicketView())
+    bot.add_view(IndexTicketView())
+    bot.add_view(SupportTicketView())
     await bot.tree.sync(guild=GUILD)
 
 
@@ -637,7 +645,13 @@ class MercyView(discord.ui.View):
             elif child.label == "Decline":
                 child.label = "Declined"
 
-        await interaction.message.edit(view=self)
+        embed = discord.Embed(
+            title="Opportunity Declined",
+            description=f"{interaction.user.mention} has declined the opportunity.",
+            color=discord.Color.red()
+        )
+        embed.set_footer(text=f"{FOOTER} • Today at {discord.utils.utcnow().strftime('%I:%M %p')}")
+        await interaction.message.edit(embed=embed, view=self)
         await interaction.response.defer()
 
 
@@ -1112,8 +1126,14 @@ async def cmd_mercy(interaction: discord.Interaction, user: discord.Member):
     )
     embed.set_footer(text=FOOTER)
 
+    prompt_embed = discord.Embed(
+        color=0x2b2d31,
+        description=f"{user.mention}, do you want to accept this opportunity and become a hitter?\n\n⏳ You have **1 minute** to respond. The decision is yours. Make it count."
+    )
+    prompt_embed.set_footer(text=FOOTER)
+
     view = MercyView(target=user, author=interaction.user)
-    msg = await interaction.channel.send(content=user.mention, embed=embed, view=view)
+    msg = await interaction.channel.send(content=user.mention, embeds=[embed, prompt_embed], view=view)
     view.message = msg
     await interaction.response.send_message("✅ Mercy opportunity sent.", ephemeral=True)
 
