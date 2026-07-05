@@ -138,7 +138,7 @@ async def make_transcript(channel: discord.TextChannel) -> io.BytesIO:
     return io.BytesIO("\n".join(lines).encode())
 
 def ts_now() -> str:
-return discord.utils.utcnow().strftime("%A, %B %d, %Y %I:%M %p")
+    return discord.utils.utcnow().strftime("%A, %B %d, %Y %I:%M %p")
 
 def mm_overwrites(guild: discord.Guild, opener: discord.Member) -> dict:
 ow = {
