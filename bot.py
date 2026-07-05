@@ -141,7 +141,7 @@ def ts_now() -> str:
     return discord.utils.utcnow().strftime("%A, %B %d, %Y %I:%M %p")
 
 def mm_overwrites(guild: discord.Guild, opener: discord.Member) -> dict:
-ow = {
+    ow = {
 guild.default_role: discord.PermissionOverwrite(read_messages=False),
 opener: discord.PermissionOverwrite(read_messages=True, send_messages=True),
 }
