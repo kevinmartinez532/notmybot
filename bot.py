@@ -225,7 +225,18 @@ async def on_ready():
     bot.add_view(MMTicketView())
     bot.add_view(IndexTicketView())
     bot.add_view(SupportTicketView())
+
+    # Wipe any stale GLOBAL commands (leftover from previous versions, e.g. old /flop, /floplb).
+    # This file only defines guild-specific commands, so the global tree is empty here —
+    # syncing it pushes that emptiness to Discord and removes old global leftovers.
+    bot.tree.clear_commands(guild=None)
+    await bot.tree.sync(guild=None)
+
+    # Sync guild-specific commands. This fully replaces whatever Discord has stored for this
+    # guild with exactly what's defined in this file right now — old commands not in this file
+    # (like /floplb, /viewflops) get removed automatically.
     await bot.tree.sync(guild=GUILD)
+    print("Synced commands, old ones cleared.")
 
 
 class MMTicketView(discord.ui.View):
@@ -961,13 +972,11 @@ async def cmd_middleman(interaction: discord.Interaction):
     embed.add_field(
         name="⚙️ How does it actually work?",
         value=(
-            "**Step 1** — Trader A mails/sends their item to the Middleman\n\n"
-            "**Step 2** — Trader B mails/sends their item to the Middleman\n\n"
-            "**Step 3** — The Middleman now holds both items, so neither trader can be scammed\n\n"
-            "**Step 4** — The Middleman checks both items are correct\n\n"
-            "**Step 5** — The Middleman mails Trader A's item to Trader B\n\n"
-            "**Step 6** — The Middleman mails Trader B's item to Trader A\n\n"
-            "**Step 7** — Both traders now have what they wanted, safely"
+            "1️⃣ **Both traders send their item to the Middleman first** — nobody sends directly to each other\n\n"
+            "2️⃣ **The Middleman now holds both items** — so neither trader can be scammed\n\n"
+            "3️⃣ **The Middleman checks everything is correct**\n\n"
+            "4️⃣ **The Middleman sends each item to the right trader** — Trader A gets what Trader B sent, and Trader B gets what Trader A sent\n\n"
+            "✅ **Done!** Both traders got what they wanted, and nobody could get scammed"
         ),
         inline=False
     )
