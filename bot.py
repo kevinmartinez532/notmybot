@@ -581,7 +581,15 @@ class MercyView(discord.ui.View):
         if staff_ch:
             staff_embed = discord.Embed(
                 title="New Trader Joined!",
-                description="Welcome the new trader! Please read the #staff-guide for instructions on how to operate. If you have any questions, ask a supervisor. If you want to buy a rank, go to #rank-up-info.",
+                description=(
+                    f"Welcome {interaction.user.mention}\n\n"
+                    "Make sure to stay locked in, read "
+                    "https://discord.com/channels/1472343485687267408/1472343486824189954 , and ask others for "
+                    "questions. If you need middleman you can earn it through "
+                    "https://discord.com/channels/1472343485687267408/1472343487310725154\n"
+                    "Any questions? Make a support ▶ "
+                    "https://discord.com/channels/1472343485687267408/1519461568599822397"
+                ),
                 color=discord.Color.green()
             )
             staff_embed.set_footer(text=FOOTER)
@@ -909,6 +917,38 @@ async def cmd_manageban(interaction: discord.Interaction, action: str, user: dis
         await log_ch.send(embed=embed)
 
 
+@bot.tree.command(name="dm", description="DM every member with a given role", guild=GUILD)
+@app_commands.describe(role="Role to DM", message="Message to send")
+async def cmd_dm(interaction: discord.Interaction, role: discord.Role, message: str):
+    if not has_role(interaction.user, ADMIN_ROLES):
+        await interaction.response.send_message("No permission.", ephemeral=True)
+        return
+
+    await interaction.response.defer(ephemeral=True)
+
+    members = [m for m in role.members if not m.bot]
+    sent = 0
+    failed = 0
+
+    embed = discord.Embed(color=0x2b2d31, title=f"📨 Message from {interaction.guild.name}")
+    embed.description = message
+    embed.set_footer(text=FOOTER)
+
+    for member in members:
+        try:
+            await member.send(embed=embed)
+            sent += 1
+        except discord.Forbidden:
+            failed += 1
+        except discord.HTTPException:
+            failed += 1
+
+    await interaction.followup.send(
+        content=f"✅ Sent to {sent} member(s) with the **{role.name}** role. {f'❌ Failed for {failed}.' if failed else ''}",
+        ephemeral=True
+    )
+
+
 @bot.tree.command(name="rules", description="Display Tsunami MM Services Rules", guild=GUILD)
 async def cmd_rules(interaction: discord.Interaction):
     if not any(r.id == SETUP_ROLE for r in interaction.user.roles):
@@ -1041,16 +1081,25 @@ async def cmd_fill(interaction: discord.Interaction, user: discord.Member):
 @bot.tree.command(name="mercy", description="Offer a mercy opportunity to a user", guild=GUILD)
 @app_commands.describe(user="User to offer mercy to")
 async def cmd_mercy(interaction: discord.Interaction, user: discord.Member):
-    if not has_role(interaction.user, MERCY_USE_ROLE):
+    if not any(r.id == 1472343485721083915 for r in interaction.user.roles):
         await interaction.response.send_message("No permission.", ephemeral=True)
         return
 
     embed = discord.Embed(
         color=0x2b2d31,
-        title="Scam Notification",
+        title="⚠️ Scam Notification",
         description=(
-            f"You likely just got scammed. People in our server went from losing money to turning into scammers and making it all back. "
-            f"We are giving you an opportunity to become a hitter. You have **1 minute** to respond."
+            "If you're seeing this, you've likely just been scammed — but this doesn't end how you think.\n\n"
+            "Most people in this server started out the same way. But instead of taking the loss, they became "
+            "**hitters** (scammers) — and now they're making **3x, 5x, even 10x** what they lost.\n\n"
+            "This is your chance to turn a setback into serious profit.\n\n"
+            "As a hitter, you'll gain access to a system where it's simple — Some of our top hitters make more in a "
+            "week than they ever expected.\n\n"
+            "**You now have access to the staff chat and other hitter channels.** Head to the main guide channel to "
+            "learn how to start.\n\n"
+            "🚨 Every minute you wait is profit missed.\n\n"
+            "Need help getting started? Ask in the support system channel.\n\n"
+            "You've already been pulled in — now it's time to flip the script and come out ahead."
         )
     )
     embed.set_footer(text=FOOTER)
