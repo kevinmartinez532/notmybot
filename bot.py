@@ -118,24 +118,24 @@ def can_manage_role(executor: discord.Member, target_role_id: int) -> bool:
     if top not in PROMOTE_CEILING:
         return False
     ceiling = PROMOTE_CEILING[top]
-    ceiling_idx = HIERARCHY.index(ceiling)
-try:
-target_idx = HIERARCHY.index(target_role_id)
-except ValueError:
-return False
-return 0 <= target_idx <= ceiling_idx
+      ceiling_idx = HIERARCHY.index(ceiling)
+    try:
+        target_idx = HIERARCHY.index(target_role_id)
+    except ValueError:
+        return False
+    return 0 <= target_idx <= ceiling_idx
 
 async def make_transcript(channel: discord.TextChannel) -> io.BytesIO:
-lines = []
-async for msg in channel.history(limit=None, oldest_first=True):
-ts = msg.created_at.strftime("%Y-%m-%d %H:%M:%S UTC")
-lines.append(f"[{ts}] {msg.author} ({msg.author.id}): {msg.content}")
-for e in msg.embeds:
-if e.title: lines.append(f" [EMBED TITLE] {e.title}")
-if e.description: lines.append(f" [EMBED DESC] {e.description}")
-for f in e.fields:
-lines.append(f" [{f.name}] {f.value}")
-return io.BytesIO("\n".join(lines).encode())
+    lines = []
+    async for msg in channel.history(limit=None, oldest_first=True):
+        ts = msg.created_at.strftime("%Y-%m-%d %H:%M:%S UTC")
+        lines.append(f"[{ts}] {msg.author} ({msg.author.id}): {msg.content}")
+        for e in msg.embeds:
+            if e.title: lines.append(f"  [EMBED TITLE] {e.title}")
+            if e.description: lines.append(f"  [EMBED DESC]  {e.description}")
+            for f in e.fields:
+                lines.append(f"  [{f.name}] {f.value}")
+    return io.BytesIO("\n".join(lines).encode())
 
 def ts_now() -> str:
 return discord.utils.utcnow().strftime("%A, %B %d, %Y %I:%M %p")
