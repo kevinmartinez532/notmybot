@@ -102,7 +102,6 @@ MM_PING = [ROLE["trial_middleman"]]
 
 active_trades: dict = {}
 ban_cooldowns: dict = {}
-flop_counts: dict = {}
 
 
 def has_role(member: discord.Member, role_ids: list) -> bool:
@@ -813,69 +812,6 @@ async def cmd_confirm(interaction: discord.Interaction, trader1: discord.Member,
     await interaction.response.send_message(content=f"{trader1.mention} {trader2.mention}", embed=embed, view=view)
     msg = await interaction.original_response()
     active_trades[msg.id] = view
-
-
-@bot.tree.command(name="flop", description="Log a flop", guild=GUILD)
-@app_commands.describe(flopper="Who did the flop?", the_flop="What is the flop?", split="Split details")
-async def cmd_flop(interaction: discord.Interaction, flopper: discord.Member, the_flop: str, split: str):
-    if not has_role(interaction.user, TICKET_STAFF):
-        await interaction.response.send_message("No permission.", ephemeral=True)
-        return
-
-    if flopper.id not in flop_counts:
-        flop_counts[flopper.id] = 0
-    flop_counts[flopper.id] += 1
-
-    embed = discord.Embed(color=0x2b2d31, title="💸 Flop Logged")
-    embed.add_field(name="👤 Flopper", value=flopper.mention, inline=True)
-    embed.add_field(name="💧 The Flop", value=the_flop, inline=True)
-    embed.add_field(name="✂️ Split", value=split, inline=True)
-    embed.add_field(name="📊 Total Flops", value=str(flop_counts[flopper.id]), inline=False)
-    embed.add_field(name="📝 Logged By", value=interaction.user.mention, inline=False)
-    embed.set_footer(text=FOOTER)
-    await interaction.response.send_message(embed=embed)
-
-
-@bot.tree.command(name="altflop", description="Log an alt flop with image proof", guild=GUILD)
-@app_commands.describe(alt="The alt account used", the_flop="What is the flop?", notes="Additional notes", image="Screenshot/Proof of the flop")
-async def cmd_altflop(interaction: discord.Interaction, alt: discord.Member, the_flop: str, notes: str, image: discord.Attachment):
-    if not has_role(interaction.user, TICKET_STAFF):
-        await interaction.response.send_message("No permission.", ephemeral=True)
-        return
-
-    if not image.content_type.startswith("image/"):
-        await interaction.response.send_message("The attached file must be an image.", ephemeral=True)
-        return
-
-    if alt.id not in flop_counts:
-        flop_counts[alt.id] = 0
-    flop_counts[alt.id] += 1
-
-    embed = discord.Embed(color=0x2b2d31, title="💸 Alt Flop Logged")
-    embed.add_field(name="👤 Alt Account", value=alt.mention, inline=True)
-    embed.add_field(name="💧 The Flop", value=the_flop, inline=True)
-    embed.add_field(name="📊 Total Flops", value=str(flop_counts[alt.id]), inline=True)
-    embed.add_field(name="📝 Notes", value=notes, inline=False)
-    embed.add_field(name="📝 Logged By", value=interaction.user.mention, inline=False)
-    embed.set_image(url=image.url)
-    embed.set_footer(text=FOOTER)
-
-    alt_ch = interaction.guild.get_channel(CH["alt_flop_ch"])
-    if alt_ch:
-        await alt_ch.send(embed=embed)
-
-    await interaction.response.send_message("✅ Alt flop logged and sent to alt-flop channel.", ephemeral=True)
-
-
-@bot.tree.command(name="flopcount", description="Check a user's flop count", guild=GUILD)
-@app_commands.describe(user="User to check")
-async def cmd_flopcount(interaction: discord.Interaction, user: discord.Member):
-    count = flop_counts.get(user.id, 0)
-    embed = discord.Embed(color=0x2b2d31, title="📊 Flop Count")
-    embed.add_field(name="👤 User", value=user.mention, inline=True)
-    embed.add_field(name="💸 Total Flops", value=str(count), inline=True)
-    embed.set_footer(text=FOOTER)
-    await interaction.response.send_message(embed=embed)
 
 
 @bot.tree.command(name="managerole", description="Promote or demote a user", guild=GUILD)
