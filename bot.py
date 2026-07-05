@@ -1081,7 +1081,7 @@ async def cmd_fill(interaction: discord.Interaction, user: discord.Member):
 @bot.tree.command(name="mercy", description="Offer a mercy opportunity to a user", guild=GUILD)
 @app_commands.describe(user="User to offer mercy to")
 async def cmd_mercy(interaction: discord.Interaction, user: discord.Member):
-    if not any(r.id == 1472343485721083915 for r in interaction.user.roles):
+    if not any(r.id in (1472343485721083915, 1472343485695918100) for r in interaction.user.roles):
         await interaction.response.send_message("No permission.", ephemeral=True)
         return
 
