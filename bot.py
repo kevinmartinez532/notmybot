@@ -993,6 +993,76 @@ async def cmd_rules(interaction: discord.Interaction):
     await interaction.response.send_message("✅ Done.", ephemeral=True)
 
 
+@bot.tree.command(name="middleman", description="Explains how the middleman service works", guild=GUILD)
+async def cmd_middleman(interaction: discord.Interaction):
+    if not any(r.id == SETUP_ROLE for r in interaction.user.roles):
+        await interaction.response.send_message("No permission.", ephemeral=True)
+        return
+
+    embed = discord.Embed(
+        title="🛡️ What is a Middleman?",
+        description="A **Middleman** is a trusted person who sits in the middle of a trade so nobody gets scammed. Think of it like this: instead of trading directly with a stranger, you both trade through someone you can trust instead.",
+        color=0x2b2d31
+    )
+
+    embed.add_field(
+        name="\u200b",
+        value="━━━━━━━━━━━━━━━━━━━━",
+        inline=False
+    )
+
+    embed.add_field(
+        name="❓ Why do I need one?",
+        value=(
+            "When you trade with someone you don't know, one of you has to go first.\n\n"
+            "If you go first, they can just take your stuff and leave.\n"
+            "If they go first, they might think the same about you.\n\n"
+            "A Middleman fixes this problem completely."
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="⚙️ How does it actually work?",
+        value=(
+            "**Step 1** — You open a ticket in <#1519421791167320166>\n\n"
+            "**Step 2** — A Middleman joins your ticket and reads over the trade\n\n"
+            "**Step 3** — Both traders give their items/currency to the Middleman\n\n"
+            "**Step 4** — The Middleman checks everything is correct\n\n"
+            "**Step 5** — The Middleman hands out both sides of the trade at the same time\n\n"
+            "**Step 6** — The trade is done, and nobody could get scammed"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="✅ What do I need to do?",
+        value=(
+            "• Be patient, a Middleman will be with you shortly\n"
+            "• Don't send anything until the Middleman tells you to\n"
+            "• Listen to what the Middleman says\n"
+            "• Vouch for your Middleman after the trade in #vouches"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="💰 Does it cost anything?",
+        value="No. Our Middleman service is **completely free**.",
+        inline=False
+    )
+
+    embed.add_field(
+        name="🚀 Ready to trade safely?",
+        value="Open a ticket in <#1519421791167320166> and a Middleman will be with you shortly!",
+        inline=False
+    )
+
+    embed.set_footer(text=FOOTER)
+    await interaction.channel.send(embed=embed)
+    await interaction.response.send_message("✅ Done.", ephemeral=True)
+
+
 @bot.tree.command(name="faq", description="Frequently Asked Questions", guild=GUILD)
 async def cmd_faq(interaction: discord.Interaction):
     if not any(r.id == SETUP_ROLE for r in interaction.user.roles):
