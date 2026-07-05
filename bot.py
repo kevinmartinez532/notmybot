@@ -1025,12 +1025,13 @@ async def cmd_middleman(interaction: discord.Interaction):
     embed.add_field(
         name="⚙️ How does it actually work?",
         value=(
-            "**Step 1** — You open a ticket in <#1519421791167320166>\n\n"
-            "**Step 2** — A Middleman joins your ticket and reads over the trade\n\n"
-            "**Step 3** — Both traders give their items/currency to the Middleman\n\n"
-            "**Step 4** — The Middleman checks everything is correct\n\n"
-            "**Step 5** — The Middleman hands out both sides of the trade at the same time\n\n"
-            "**Step 6** — The trade is done, and nobody could get scammed"
+            "**Step 1** — Trader A mails/sends their item to the Middleman\n\n"
+            "**Step 2** — Trader B mails/sends their item to the Middleman\n\n"
+            "**Step 3** — The Middleman now holds both items, so neither trader can be scammed\n\n"
+            "**Step 4** — The Middleman checks both items are correct\n\n"
+            "**Step 5** — The Middleman mails Trader A's item to Trader B\n\n"
+            "**Step 6** — The Middleman mails Trader B's item to Trader A\n\n"
+            "**Step 7** — Both traders now have what they wanted, safely"
         ),
         inline=False
     )
