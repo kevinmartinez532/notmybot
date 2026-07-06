@@ -234,9 +234,9 @@ async def send_trade_log(guild: discord.Guild) -> bool:
     fee = random.choice(FEE_OPTIONS)
 
     embed = discord.Embed(color=0x2b2d31, title="🔄 Trade Log")
-    embed.add_field(name="Middleman", value=str(mm.display_name), inline=False)
-    embed.add_field(name="Trader 1", value=str(trader1.display_name), inline=False)
-    embed.add_field(name="Trader 2", value=str(trader2.display_name), inline=False)
+    embed.add_field(name="Middleman", value=mm.mention, inline=False)
+    embed.add_field(name="Trader 1", value=trader1.mention, inline=False)
+    embed.add_field(name="Trader 2", value=trader2.mention, inline=False)
     embed.add_field(name="Trade", value=trade, inline=False)
     embed.add_field(name="Fee", value=fee, inline=False)
     embed.set_footer(text=FOOTER)
