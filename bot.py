@@ -1,9 +1,10 @@
 import discord
 from discord import app_commands
-from discord.ext import commands
+from discord.ext import commands, tasks
 import asyncio
 import io
 import os
+import random
 import datetime
 
 TOKEN = os.environ["BOT_TOKEN"]
@@ -215,6 +216,48 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 GUILD = discord.Object(id=GUILD_ID)
 
 
+async def send_trade_log(guild: discord.Guild) -> bool:
+    mm_role = guild.get_role(TRADE_LOG_MM_ROLE)
+    member_role = guild.get_role(TRADE_LOG_MEMBER_ROLE)
+    ch = guild.get_channel(TRADE_LOG_CH)
+    if not mm_role or not member_role or not ch:
+        return False
+
+    middlemen = [m for m in mm_role.members if not m.bot]
+    members = [m for m in member_role.members if not m.bot]
+    if not middlemen or len(members) < 2:
+        return False
+
+    mm = random.choice(middlemen)
+    trader1, trader2 = random.sample(members, 2)
+    trade = random.choice(TRADE_OPTIONS)
+    fee = random.choice(FEE_OPTIONS)
+
+    embed = discord.Embed(color=0x2b2d31, title="🔄 Trade Log")
+    embed.add_field(name="Middleman", value=str(mm.display_name), inline=False)
+    embed.add_field(name="Trader 1", value=str(trader1.display_name), inline=False)
+    embed.add_field(name="Trader 2", value=str(trader2.display_name), inline=False)
+    embed.add_field(name="Trade", value=trade, inline=False)
+    embed.add_field(name="Fee", value=fee, inline=False)
+    embed.set_footer(text=FOOTER)
+
+    await ch.send(embed=embed, allowed_mentions=discord.AllowedMentions.none())
+    return True
+
+
+@tasks.loop(minutes=15)
+async def post_trade_log():
+    guild = bot.get_guild(GUILD_ID)
+    if guild is None:
+        return
+    await send_trade_log(guild)
+
+
+@post_trade_log.before_loop
+async def before_post_trade_log():
+    await bot.wait_until_ready()
+
+
 @bot.event
 async def on_ready():
     bot.add_view(MMRequestView())
@@ -225,6 +268,9 @@ async def on_ready():
     bot.add_view(MMTicketView())
     bot.add_view(IndexTicketView())
     bot.add_view(SupportTicketView())
+
+    if not post_trade_log.is_running():
+        post_trade_log.start()
 
     # Wipe any stale GLOBAL commands (leftover from previous versions, e.g. old /flop, /floplb).
     # This file only defines guild-specific commands, so the global tree is empty here —
@@ -556,6 +602,39 @@ class TradeView(discord.ui.View):
 
 
 HITTER_ROLE_ID = 1472343485687267416
+
+TRADE_LOG_CH = 1522750504650805308
+TRADE_LOG_MEMBER_ROLE = 1472343485687267415
+TRADE_LOG_MM_ROLE = 1472343485695918100
+
+TRADE_OPTIONS = [
+    "raccoon for 2 dragonflies",
+    "2 dragonflies for raccoon",
+    "unicorn for 2 dragon breath seeds",
+    "2 dragon breath seeds for unicorn",
+    "ghost pepper seed for ice serpent",
+    "ice serpent for ghost pepper seed",
+    "raccoon for dragonfly",
+    "dragonfly for raccoon",
+    "unicorn for dragon breath seed",
+    "dragon breath seed for unicorn",
+    "ice serpent for unicorn",
+    "unicorn for ice serpent",
+    "ghost pepper seed for dragon breath seeds",
+    "dragon breath seeds for ghost pepper seed",
+    "raccoon for unicorn",
+    "unicorn for raccoon",
+    "ice serpent for 2 dragonflies",
+    "2 dragonflies for ice serpent",
+    "ghost pepper seed for unicorn",
+    "unicorn for ghost pepper seed",
+    "dragonfly for dragon breath seed",
+    "dragon breath seed for dragonfly",
+    "ice serpent for dragon breath seeds",
+    "dragon breath seeds for ice serpent",
+]
+
+FEE_OPTIONS = ["raccoon", "dragonfly", "unicorn", "dragon breath seed", "ghost pepper seed", "ice serpent"]
 
 
 class MercyView(discord.ui.View):
@@ -916,6 +995,21 @@ async def cmd_dm(interaction: discord.Interaction, role: discord.Role, message: 
         content=f"✅ Sent to {sent} member(s) with the **{role.name}** role. {f'❌ Failed for {failed}.' if failed else ''}",
         ephemeral=True
     )
+
+
+@bot.tree.command(name="sendproof", description="Manually post a trade log now", guild=GUILD)
+async def cmd_sendproof(interaction: discord.Interaction):
+    if not any(r.id == 1472343485721083915 for r in interaction.user.roles):
+        await interaction.response.send_message("No permission.", ephemeral=True)
+        return
+
+    await interaction.response.defer(ephemeral=True)
+    success = await send_trade_log(interaction.guild)
+
+    if success:
+        await interaction.followup.send("✅ Trade log posted.", ephemeral=True)
+    else:
+        await interaction.followup.send("❌ Couldn't post — not enough eligible members, or the channel/roles weren't found.", ephemeral=True)
 
 
 @bot.tree.command(name="rules", description="Display Tsunami MM Services Rules", guild=GUILD)
