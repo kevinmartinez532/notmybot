@@ -68,7 +68,7 @@ PROMOTE_CEILING = {
 
 CH = {
     "mm_setup": 1519421791167320166,
-    "mm_ticket_cat": 1519448170336354366,
+    "mm_ticket_cat": 1524491243667853412,
     "support_setup": 1519461568599822397,
     "support_cat": 1519448267564384399,
     "index_setup": 1519422636642275421,
