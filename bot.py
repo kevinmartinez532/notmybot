@@ -97,7 +97,7 @@ INDEX_CLAIM = [ROLE["index_mm"]]
 ADMIN_ROLES = [ROLE["head_of_mang"], ROLE["head_of_dev"], ROLE["head_of_op"],
     ROLE["cheif_mang_officer"], ROLE["head_of_coordination"], ROLE["head_of_marketing"],
     ROLE["president"], ROLE["head_of_security"]]
-SETUP_ROLE = 1472343485721083915
+SETUP_ROLE = 1524530538122182717
 MERCY_USE_ROLE = [ROLE["trial_middleman"], ROLE["head_middleman"]]
 MM_PING = [ROLE["trial_middleman"]]
 
